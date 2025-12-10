@@ -16,8 +16,8 @@ void handleInput(RenderWindow& window, GameState& state) {
 
 
     int line = -2, col = -2;
-    float boardX = (window.getSize().x - tableSize) / 2;
-    float boardY = (window.getSize().y - tableSize) / 2;
+    float boardX = (static_cast<float>(window.getSize().x) - tableSize) / 2.f;
+    float boardY = (static_cast<float>(window.getSize().y) - tableSize) / 2.f;
 
     while (const optional event = window.pollEvent())
     {
@@ -49,8 +49,8 @@ void handleInput(RenderWindow& window, GameState& state) {
                 int latura = tableSize / squareNumber;
                 Vector2i mPos = Mouse::getPosition(window);
 
-                line = (mPos.y - boardY) / latura;
-                col = (mPos.x - boardX) / latura;
+                line = static_cast<int>((mPos.y - boardY) / latura);
+                col = static_cast<int>((mPos.x - boardX) / latura);
 
                 int varf = T[line + 1][col + 1].nr;
 
@@ -65,8 +65,8 @@ void handleInput(RenderWindow& window, GameState& state) {
             else if (buttonReleased->button == Mouse::Button::Left && waitingForLeftClick) {
                 int latura = tableSize / squareNumber;
                 Vector2i mPos = Mouse::getPosition(window);
-                line = (mPos.y - boardY) / latura;
-                col = (mPos.x - boardX) / latura;
+                line = static_cast<int>((mPos.y - boardY) / latura);
+                col = static_cast<int>((mPos.x - boardX) / latura);
 
                 int varf = T[line][col].nr;
                 if (correctSelection) {
@@ -92,8 +92,8 @@ void handleInput(RenderWindow& window, GameState& state) {
                 old_col = -20;
                 int latura = tableSize / squareNumber;
                 Vector2i mPos = Mouse::getPosition(window);
-                line = (mPos.y - boardY) / latura + 1;
-                col = (mPos.x - boardX) / latura + 1;
+                line = static_cast<int>((mPos.y - boardY) / latura + 1);
+                col = static_cast<int>((mPos.x - boardX) / latura + 1);
 
                 if (boardX < mPos.x && mPos.x < boardX + tableSize && boardY < mPos.y && mPos.y < boardY + tableSize)
                     if (player == P1) {
