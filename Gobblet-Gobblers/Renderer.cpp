@@ -1,111 +1,178 @@
-#include "Renderer.h"
-#include <iostream> // In case you need debug prints
+﻿#include "Renderer.h"
+#include <algorithm>
+#include <string>
 
 using namespace sf;
 using namespace std;
 
-void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
-    const auto& T = state.T;
-    float boardX = (window.getSize().x - tableSize) / 2;
-    float boardY = (window.getSize().y - tableSize) / 2;
 
-    float latura = tableSize / squareNumber * 1.f;
+float getScaleFactor(const RenderWindow& window) {
+    float w = static_cast<float>(window.getSize().x);
+    float h = static_cast<float>(window.getSize().y);
+    return std::min(w, h);
+}
 
-    int varf = T[line + 1][col + 1].nr;
+void centerText(Text& text, float x, float y) {
+    FloatRect bounds = text.getLocalBounds();
+    text.setOrigin({ bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f });
+    text.setPosition({ x, y });
+}
 
-    CircleShape piece(radius);
+void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg) {
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+    float scale = getScaleFactor(window);
 
-    switch (T[line + 1][col + 1].p[varf]) {
+    unsigned int fontSize = static_cast<unsigned int>(scale * cfg.sizePerc);
+    if (fontSize < 10) fontSize = 10;
+
+    Text txt(font, cfg.text, fontSize);
+    txt.setFillColor(cfg.color);
+
+    FloatRect bounds = txt.getLocalBounds();
+    txt.setOrigin({ bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f });
+    txt.setPosition({ winW / 2.0f, winH * cfg.yPerc });
+
+    window.draw(txt);
+}
+
+void drawCell(RenderWindow& window, const GameState& state, int line, int col, float latura, float boardX, float boardY) {
+    int varf = state.T[line + 1][col + 1].nr;
+    int valPiesa = state.T[line + 1][col + 1].p[varf];
+
+    if (valPiesa == 0) return;
+
+    float maxRadius = latura / 2.0f;
+    float radius = 0.f;
+    Color color = Color::White;
+
+    switch (valPiesa) {
     case -3:
-        piece.setFillColor(Color::Red);
-        piece.setRadius(50);
+        color = Color::Red;
+        radius = maxRadius * 0.85f; // Mare
         break;
     case -2:
-        piece.setFillColor(Color::Red);
-        piece.setRadius(40);
+        color = Color::Red;
+        radius = maxRadius * 0.65f; // Mediu
         break;
     case -1:
-        piece.setFillColor(Color::Red);
-        piece.setRadius(30);
+        color = Color::Red;
+        radius = maxRadius * 0.40f; // Mic
         break;
     case 1:
-        piece.setFillColor(Color::Green);
-        piece.setRadius(30);
+        color = Color::Green;
+        radius = maxRadius * 0.40f; // Mic
         break;
     case 2:
-        piece.setFillColor(Color::Green);
-        piece.setRadius(40);
+        color = Color::Green;
+        radius = maxRadius * 0.65f; // Mediu
         break;
     case 3:
-        piece.setFillColor(Color::Green);
-        piece.setRadius(50);
+        color = Color::Green;
+        radius = maxRadius * 0.85f; // Mare
         break;
     }
 
-    float pieceSize = piece.getRadius();
+    CircleShape piece(radius);
+    piece.setFillColor(color);
+    piece.setOrigin({ radius, radius });
 
-    piece.setPosition({ boardX + col * latura + latura / 2 - pieceSize, boardY + line * latura + latura / 2 - pieceSize });
+    float centerX = boardX + col * latura + latura / 2.0f;
+    float centerY = boardY + line * latura + latura / 2.0f;
 
+    piece.setPosition({ centerX, centerY });
     window.draw(piece);
 }
 
-void drawTable(RenderWindow& window, const GameState& state) {
-    auto squareColor = Color::White;
-
-    float boardX = (window.getSize().x - tableSize) / 2;
-    float boardY = (window.getSize().y - tableSize) / 2;
-
-    float latura = tableSize / squareNumber * 1.f;
-    RectangleShape square;
-
-    square.setSize({ latura,latura });
-    square.setFillColor(squareColor);
-    square.setOutlineThickness(5.f);
-    square.setOutlineColor(Color::Black);
-    for (int i = 0; i < squareNumber; i++)
-        for (int j = 0; j < squareNumber; j++) {
-            square.setPosition({ boardX + j * latura,boardY + i * latura });
-            window.draw(square);
-
-            drawCell(window, state, i, j);
-        }
-
-    square.setPosition({ boardX, boardY });
-    square.setSize({ tableSize,tableSize });
-    square.setOutlineThickness(10.f);
-    square.setFillColor(Color::Transparent);
-    square.setOutlineColor(Color::Red);
-    window.draw(square);
-
-}
 
 void highlightSquare(RenderWindow& window, int col, int line) {
-    float boardX = (window.getSize().x - tableSize) / 2;
-    float boardY = (window.getSize().y - tableSize) / 2;
-    float latura = tableSize / squareNumber;
-    RectangleShape square;
-    square.setSize({ latura,latura });
-    square.setOutlineThickness(12.f);
-    square.setOutlineColor(Color::Red);
-    square.setPosition({ boardX + col * latura,boardY + line * latura });
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+    float currentTableSize = std::min(winW, winH) * 0.8f;
+
+    float boardX = (winW - currentTableSize) / 2.0f;
+    float boardY = (winH - currentTableSize) / 2.0f;
+    float latura = currentTableSize / squareNumber;
+
+    RectangleShape square({ latura, latura });
     square.setFillColor(Color::Transparent);
+    square.setOutlineThickness(8.f);
+    square.setOutlineColor(Color::Red);
+
+    square.setPosition({ boardX + col * latura, boardY + line * latura });
 
     window.draw(square);
 }
 
-// THE NEW WRAPPER FUNCTION
+void drawTable(RenderWindow& window, const GameState& state) {
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+
+    float currentTableSize = std::min(winW, winH) * 0.8f;
+
+
+    float boardX = (winW - currentTableSize) / 2.0f;
+    float boardY = (winH - currentTableSize) / 2.0f;
+
+    float latura = currentTableSize / squareNumber;
+
+    RectangleShape square({ latura, latura });
+    square.setFillColor(Color::White);
+    square.setOutlineThickness(5.f);
+    square.setOutlineColor(Color::Black);
+
+    // Desenăm grila
+    for (int i = 0; i < squareNumber; i++) {
+        for (int j = 0; j < squareNumber; j++) {
+            square.setPosition({ boardX + j * latura, boardY + i * latura });
+            window.draw(square);
+
+            drawCell(window, state, i, j, latura, boardX, boardY);
+        }
+    }
+
+    RectangleShape border({ currentTableSize, currentTableSize });
+    border.setPosition({ boardX, boardY });
+    border.setFillColor(Color::Transparent);
+    border.setOutlineThickness(10.f);
+    border.setOutlineColor(Color::Red);
+    window.draw(border);
+}
+
 void drawGame(RenderWindow& window, const GameState& state, Text& text) {
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+
     drawTable(window, state);
 
     if (state.old_col != -20) {
         highlightSquare(window, state.old_col, state.old_line);
     }
 
+    unsigned int uiSize = static_cast<unsigned int>(std::min(winW, winH) * 0.05f);
+    if (uiSize < 12) uiSize = 12;
+    text.setCharacterSize(uiSize);
+
     text.setString("Player " + to_string(state.player + 1));
-    text.setPosition({ 100, 50 });
+    text.setOrigin({ 0.f, 0.f });
+    text.setPosition({ winW * 0.05f, winH * 0.05f });
     window.draw(text);
 
     text.setString("Size: " + to_string(state.pieceSize));
-    text.setPosition({ (float)tableSize + 150, 50 });
+    FloatRect sBounds = text.getLocalBounds();
+    text.setOrigin({ sBounds.size.x, 0.f });
+    text.setPosition({ winW * 0.95f, winH * 0.05f });
     window.draw(text);
+}
+
+void drawMenu(RenderWindow& window, Font& font) {
+    ButtonConfig titleCfg = { "GOBBLET GOBBLERS", 0.20f, Color::Yellow, 0.08f };
+    ButtonConfig playCfg = { "NEW GAME",         0.45f, Color::White,  0.05f };
+    ButtonConfig loadCfg = { "LOAD GAME",        0.60f, Color(150,150,150), 0.05f };
+    ButtonConfig exitCfg = { "EXIT",             0.75f, Color::White,  0.05f };
+
+    drawStyledButton(window, font, titleCfg);
+    drawStyledButton(window, font, playCfg);
+    drawStyledButton(window, font, loadCfg);
+    drawStyledButton(window, font, exitCfg);
 }

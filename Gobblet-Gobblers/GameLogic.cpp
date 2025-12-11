@@ -14,10 +14,10 @@ void initGame(GameState& state) {
     state.old_line = -20;
     state.old_col = -20;
 
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for (int i = 0; i <= squareNumber; i++) {
+        for (int j = 0; j <= squareNumber; j++) {
             state.T[i][j].nr = 0;
-            for (int k = 0; k < 4; k++) {
+            for (int k = 0; k <= squareNumber; k++) {
                 state.T[i][j].p[k] = 0;
             }
         }
@@ -28,7 +28,7 @@ bool punePiesa(GameState& state, int linia, int coloana, int x) {
     auto& T = state.T;
     auto& player = state.player;
 
-    if (T[linia][coloana].nr == 3) {
+    if (T[linia][coloana].nr == squareNumber) {
         cout << "Nu se poate amplasa, deoarece sunt deja 3 piese.";
         return false;
     }

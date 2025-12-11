@@ -12,6 +12,7 @@ int main()
 
     GameState myGame;
     initGame(myGame);
+    myGame.appState = STATE_MENU;
 
     Font font;
     if (!font.openFromFile("Minecraftia-Regular.ttf")) return -1;
@@ -24,13 +25,19 @@ int main()
     {
         handleInput(window, myGame);
 
-        if (checkWin(myGame)) {
-            printf("Player %d Wins!\n", myGame.player + 1);
-            window.close();
-        }
-
         window.clear();
-        drawGame(window, myGame, text);
+
+        if (myGame.appState == STATE_MENU) {
+            drawMenu(window, font);
+        }
+        else if (myGame.appState == STATE_GAME)
+        {
+            drawGame(window, myGame, text);
+            if (checkWin(myGame)) {
+                printf("Player %d Wins!\n", myGame.player + 1);
+                window.close();
+            }
+        }
         window.display();
     }
 
