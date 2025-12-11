@@ -22,33 +22,49 @@ void initGame(GameState& state) {
             }
         }
     }
+
+    for (int i = 1; i < 4; i++) {
+        state.pieces[P1][i] = { 2 };
+        state.pieces[P2][i] = { 2 };
+    }
 }
 
-bool punePiesa(GameState& state, int linia, int coloana, int x) {
+bool punePiesa(GameState& state, int linia, int coloana, int piece) {
     auto& T = state.T;
     auto& player = state.player;
+    auto& pieces = state.pieces;
+    auto& movingPiece = state.correctSelection;
+    int pieceSize = abs(piece);
 
-    if (T[linia][coloana].nr == 3) {
-        cout << "Nu se poate amplasa, deoarece sunt deja 3 piese.";
+    if (pieces[player][pieceSize] <= 0 && !movingPiece) {
+        printf("Nu mai aveti piese de dimensiunea %d!", pieceSize);
         return false;
     }
-    else
-    {
-        int varf = T[linia][coloana].nr;
-        int y = T[linia][coloana].p[varf];
-        if (abs(x) <= abs(y)) {
-            cout << "Nu se poate amplasa decat o piesa mai mare peste o alta piesa.";
+    else {
+        if (T[linia][coloana].nr == 3) {
+            cout << "Nu se poate amplasa, deoarece sunt deja 3 piese.";
             return false;
         }
         else
         {
-            T[linia][coloana].nr++;
-            T[linia][coloana].p[T[linia][coloana].nr] = x;
-            if (player == P1)
-                player = P2;
+            int varf = T[linia][coloana].nr;
+            int y = T[linia][coloana].p[varf];
+            if (abs(piece) <= abs(y)) {
+                cout << "Nu se poate amplasa decat o piesa mai mare peste o alta piesa.";
+                return false;
+            }
             else
-                player = P1;
-            return true;
+            {
+                T[linia][coloana].nr++;
+                T[linia][coloana].p[T[linia][coloana].nr] = piece;
+                if(!movingPiece)
+                    pieces[player][pieceSize]--;
+                if (player == P1)
+                    player = P2;
+                else
+                    player = P1;
+                return true;
+            }
         }
     }
 }

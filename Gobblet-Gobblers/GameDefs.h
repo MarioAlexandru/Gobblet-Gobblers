@@ -19,6 +19,8 @@ struct GameState {
     int player;
 
     // Input/State Data
+    int pieces[2][4]; //player pieces array
+
     int pieceSize;
     int old_line;
     int old_col;
