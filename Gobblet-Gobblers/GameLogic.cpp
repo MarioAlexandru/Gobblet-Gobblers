@@ -1,5 +1,6 @@
 #include "GameLogic.h"
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 using namespace std;
@@ -100,4 +101,59 @@ bool checkWin(const GameState& state) {
         || (T[1][3].nr && T[2][2].nr && T[3][1].nr) && sign(T[1][3].p[T[1][3].nr]) == sign(T[2][2].p[T[2][2].nr]) && sign(T[2][2].p[T[2][2].nr]) == sign(T[3][1].p[T[3][1].nr]))
         return true;
     return false;
+}
+
+//Gama Data functions
+bool saveGameState(GameState& state, const char* filename) {
+    ofstream saveFile(filename);
+    if (!saveFile) return false;
+
+    //Player turn
+    saveFile << state.player << '\n';
+
+    //Board order
+    for(int i = 1; i <= squareNumber; i++)
+        for (int j = 1; j <= squareNumber; j++) {
+            const auto &cell = state.T[i][j];
+
+            saveFile << cell.nr;
+            for (int k = 1; k <= cell.nr; k++) {
+                saveFile << ' ' << cell.p[k];
+            }
+
+            saveFile << '\n';
+        }
+    for (int p = P1; p <= P2; p++) {
+        for (int i = 1; i <= pieceTypes; i++)
+            saveFile << state.pieces[p][i] << ' ';
+        saveFile << '\n';
+    }
+}
+
+bool loadGameState(GameState& state, const char* filename) {
+    ifstream file(filename);
+
+    //read player
+    if (!(file >> state.player)) return false;
+
+    //read board cells in order
+    for(int i = 1; i <= squareNumber; i++)
+        for (int j = 1; j <= squareNumber; j++) {
+            auto& cell = state.T[i][j];
+
+            if (!(file >> cell.nr)) return false;
+            if (cell.nr < 0 || cell.nr > pieceTypes) return false;
+
+            for (int k = 1; k <= cell.nr; k++) {
+                if (!(file >> cell.p[k])) return false;
+            }
+            //zero for unused
+            for (int k = cell.nr + 1; k <= pieceTypes; k++) {
+                cell.p[k] = 0;
+            }
+        }
+    //read each player's remaining pieces
+    for (int p = P1; p <= P2; p++)
+        for (int k = 1; k <= pieceTypes; k++)
+            if (!(file >> state.pieces[p][k])) return false;
 }

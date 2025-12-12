@@ -32,12 +32,17 @@ void handleMenuInput(RenderWindow& window, GameState& state, const Event& event)
             FloatRect btnExitRect = getButtonRect(window, 0.75f, 0.05f, 0.2f);
 
             if (btnPlayRect.contains(mouseF)) {
-                initGame(state);
                 state.appState = STATE_GAME;
+                initGame(state);
             }
             else if (btnLoadRect.contains(mouseF))
             {
-                printf("Load Game: Coming Soon!\n");
+                initGame(state);
+                state.appState = STATE_GAME;
+                if (!(loadGameState(state, "save.txt"))) {
+                    printf("Failed to load game correctly");
+                }
+                else printf("Last game has been succesfully loaded");
             }
             else if (btnExitRect.contains(mouseF)) {
                 window.close();
@@ -123,6 +128,7 @@ void handleInput(RenderWindow& window, GameState& state) {
     while (const optional event = window.pollEvent()) {
         if (event->is<Event::Closed>())
         {
+            saveGameState(state, "save.txt");
             window.close();
         }
         else if(const auto* resizeEvent = event->getIf<Event::Resized>())
