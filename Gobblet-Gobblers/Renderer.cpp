@@ -140,6 +140,8 @@ void drawTable(RenderWindow& window, const GameState& state) {
 }
 
 void drawGame(RenderWindow& window, const GameState& state, Text& text) {
+    auto player = state.player;
+
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
@@ -158,7 +160,7 @@ void drawGame(RenderWindow& window, const GameState& state, Text& text) {
     text.setPosition({ winW * 0.05f, winH * 0.05f });
     window.draw(text);
 
-    text.setString("Size: " + to_string(state.pieceSize));
+    text.setString("Size: " + to_string(state.pieceSize) + "(x" + to_string(state.pieces[player][state.pieceSize]) + ")");
     FloatRect sBounds = text.getLocalBounds();
     text.setOrigin({ sBounds.size.x, 0.f });
     text.setPosition({ winW * 0.95f, winH * 0.05f });
