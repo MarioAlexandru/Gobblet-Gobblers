@@ -7,6 +7,8 @@ using namespace std;
 int sign(int x) { return (x > 0) - (x < 0); }
 
 void initGame(GameState& state) {
+    int piecesNr = 2; //default game rules
+
     state.player = P1;
     state.pieceSize = 1;
     state.waitingForLeftClick = false;
@@ -22,35 +24,54 @@ void initGame(GameState& state) {
             }
         }
     }
+
+    for (int k = 1; k < 4; k++) {
+        state.pieces[P1][k] = { piecesNr };
+        state.pieces[P2][k] = { piecesNr };
+    }
 }
 
-bool punePiesa(GameState& state, int linia, int coloana, int x) {
+bool punePiesa(GameState& state, int linia, int coloana, int piece) {
     auto& T = state.T;
     auto& player = state.player;
+    auto movingPiece = state.correctSelection;
+    auto& pieces = state.pieces;
+    int pieceSize = abs(piece);
 
-    if (T[linia][coloana].nr == squareNumber) {
-        cout << "Nu se poate amplasa, deoarece sunt deja 3 piese.";
+    if (pieces[player][pieceSize] <= 0 && !movingPiece) {
+        printf("Nu mai sunt piese de dimensiunea %d!\n", pieceSize);
         return false;
     }
-    else
-    {
-        int varf = T[linia][coloana].nr;
-        int y = T[linia][coloana].p[varf];
-        if (abs(x) <= abs(y)) {
-            cout << "Nu se poate amplasa decat o piesa mai mare peste o alta piesa.";
+    else {
+        if (T[linia][coloana].nr == squareNumber) {
+            printf("Nu se poate amplasa, deoarece sunt deja 3 piese.\n");
             return false;
         }
         else
         {
-            T[linia][coloana].nr++;
-            T[linia][coloana].p[T[linia][coloana].nr] = x;
-            if (player == P1)
-                player = P2;
+            int varf = T[linia][coloana].nr;
+            int y = T[linia][coloana].p[varf];
+            if (abs(piece) <= abs(y)) {
+                printf("Nu se poate amplasa decat o piesa mai mare peste o alta piesa.\n");
+                return false;
+            }
             else
-                player = P1;
-            return true;
+            {
+                T[linia][coloana].nr++;
+                T[linia][coloana].p[T[linia][coloana].nr] = piece;
+
+                if (!movingPiece)
+                    pieces[player][pieceSize]--;
+
+                if (player == P1)
+                    player = P2;
+                else
+                    player = P1;
+                return true;
+            }
         }
     }
+    
 }
 
 void movePiece(GameState& state, int old_l, int old_c, int new_l, int new_c) {
@@ -61,7 +82,7 @@ void movePiece(GameState& state, int old_l, int old_c, int new_l, int new_c) {
     if (punePiesa(state, new_l + 1, new_c + 1, pieceVal)) {
         T[old_l + 1][old_c + 1].p[varf] = 0;
         T[old_l + 1][old_c + 1].nr--;
-        printf("Piece succesfully moved");
+        printf("Piesa mutata cu succes.\n");
     }
 }
 

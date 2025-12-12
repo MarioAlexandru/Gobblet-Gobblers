@@ -4,6 +4,7 @@
 using namespace sf;
 
 // Constants
+#define pieceTypes 3
 #define squareNumber 3
 #define P1 0
 #define P2 1
@@ -18,7 +19,7 @@ enum AppState {
 
 // The Piece Stack
 struct stiva {
-    int p[squareNumber+1];
+    int p[pieceTypes+1];
     int nr;
 };
 
@@ -26,6 +27,7 @@ struct GameState {
     // Board Data
     stiva T[squareNumber+1][squareNumber+1];
     int player;
+    int pieces[2][4];
 
     // Input/State Data
     int pieceSize;

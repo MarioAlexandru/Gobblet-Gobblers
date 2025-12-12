@@ -34,7 +34,7 @@ int main()
         {
             drawGame(window, myGame, text);
             if (checkWin(myGame)) {
-                printf("Player %d Wins!\n", myGame.player + 1);
+                printf("Player %d Wins!\n", abs(myGame.player-1) + 1);
                 window.close();
             }
         }
