@@ -5,17 +5,19 @@
 using namespace sf;
 using namespace std;
 
-FloatRect getButtonRect(const RenderWindow& window, float yPerc, float sizePerc, float estimatedWidthPerc) {
+FloatRect getButtonRect(const RenderWindow& window,float xPerc, float yPerc, float sizePerc, float estimatedWidthPerc) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
-
     float scale = std::min(winW, winH);
 
     float height = scale * sizePerc * 1.5f;
     float width = scale * estimatedWidthPerc;
 
+    float xPos = winW * xPerc;
+    float yPos = winH * yPerc;
+
     return FloatRect(
-        { winW / 2.0f - width / 2.0f, (winH * yPerc) - height / 2.0f },
+        { xPos - width / 2.0f, yPos - height / 2.0f },
         { width, height }
     );
 }
@@ -27,22 +29,23 @@ void handleMenuInput(RenderWindow& window, GameState& state, const Event& event)
             Vector2i mPos = Mouse::getPosition(window);
             Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
 
-            FloatRect btnPlayRect = getButtonRect(window, 0.45f, 0.05f, 0.4f);
-            FloatRect btnLoadRect = getButtonRect(window, 0.60f, 0.05f, 0.4f);
-            FloatRect btnExitRect = getButtonRect(window, 0.75f, 0.05f, 0.2f);
+            FloatRect btnPlayRect = getButtonRect(window, 0.5f, 0.45f, 0.05f, 0.4f);
+            FloatRect btnLoadRect = getButtonRect(window, 0.5f, 0.60f, 0.05f, 0.4f);
+            FloatRect btnExitRect = getButtonRect(window, 0.5f, 0.75f, 0.05f, 0.2f);
 
             if (btnPlayRect.contains(mouseF)) {
                 state.appState = STATE_GAME;
                 initGame(state);
             }
             else if (btnLoadRect.contains(mouseF))
-            {
-                initGame(state);
-                state.appState = STATE_GAME;
+            { 
                 if (!(loadGameState(state, "save.txt"))) {
                     printf("Failed to load game correctly");
                 }
-                else printf("Last game has been succesfully loaded");
+                else {
+                    state.appState = STATE_GAME;
+                    printf("Last game has been succesfully loaded");
+                }
             }
             else if (btnExitRect.contains(mouseF)) {
                 window.close();
@@ -59,6 +62,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
     auto& correctSelection = state.correctSelection;
     auto& old_line = state.old_line;
     auto& old_col = state.old_col;
+    FloatRect btnSaveRect = getButtonRect(window, 0.1f, 0.95f, 0.04f, 0.2f);
 
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
@@ -79,6 +83,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
 
     if (const auto* buttonReleased = event.getIf<Event::MouseButtonReleased>()) {
         Vector2i mPos = Mouse::getPosition(window);
+        Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
 
         int line = static_cast<int>((mPos.y - boardY) / latura);
         int col = static_cast<int>((mPos.x - boardX) / latura);
@@ -108,6 +113,10 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
             }
             old_line = -20; old_col = -20;
             waitingForLeftClick = false; correctSelection = false;
+            if (btnSaveRect.contains(mouseF)) {
+                saveGameState(state, "save.txt");
+                state.appState = STATE_MENU;
+            }
         }
         else if (buttonReleased->button == Mouse::Button::Right) {
             waitingForLeftClick = false; correctSelection = false;
@@ -128,7 +137,6 @@ void handleInput(RenderWindow& window, GameState& state) {
     while (const optional event = window.pollEvent()) {
         if (event->is<Event::Closed>())
         {
-            saveGameState(state, "save.txt");
             window.close();
         }
         else if(const auto* resizeEvent = event->getIf<Event::Resized>())

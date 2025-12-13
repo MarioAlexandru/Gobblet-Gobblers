@@ -1,6 +1,8 @@
 ﻿#include "Renderer.h"
+#include "GameLogic.h"
 #include <algorithm>
 #include <string>
+#include <fstream>
 
 using namespace sf;
 using namespace std;
@@ -31,7 +33,7 @@ void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg)
 
     FloatRect bounds = txt.getLocalBounds();
     txt.setOrigin({ bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f });
-    txt.setPosition({ winW / 2.0f, winH * cfg.yPerc });
+    txt.setPosition({ winW * cfg.xPerc, winH * cfg.yPerc });
 
     window.draw(txt);
 }
@@ -139,7 +141,7 @@ void drawTable(RenderWindow& window, const GameState& state) {
     window.draw(border);
 }
 
-void drawGame(RenderWindow& window, const GameState& state, Text& text) {
+void drawGame(RenderWindow& window, const GameState& state, Text& text, Font& font) {
     auto player = state.player;
 
     float winW = static_cast<float>(window.getSize().x);
@@ -165,13 +167,25 @@ void drawGame(RenderWindow& window, const GameState& state, Text& text) {
     text.setOrigin({ sBounds.size.x, 0.f });
     text.setPosition({ winW * 0.95f, winH * 0.05f });
     window.draw(text);
+
+    ButtonConfig saveCfg = { "Save",             0.1f, 0.95f, Color::Red,  0.04f };
+    drawStyledButton(window, font, saveCfg);
 }
 
-void drawMenu(RenderWindow& window, Font& font) {
-    ButtonConfig titleCfg = { "GOBBLET GOBBLERS", 0.20f, Color::Yellow, 0.08f };
-    ButtonConfig playCfg = { "NEW GAME",         0.45f, Color::White,  0.05f };
-    ButtonConfig loadCfg = { "LOAD GAME",        0.60f, Color(150,150,150), 0.05f };
-    ButtonConfig exitCfg = { "EXIT",             0.75f, Color::White,  0.05f };
+void drawMenu(RenderWindow& window,GameState state, Font& font) {
+    Color loadColor = Color(150, 150, 150);
+
+    ifstream testFile("save.txt");
+    bool saveExists = testFile.good();
+    testFile.close();
+    
+    if (saveExists)
+        loadColor = Color::White;
+
+    ButtonConfig titleCfg = { "GOBBLET GOBBLERS",0.5f, 0.20f, Color::Yellow, 0.08f };
+    ButtonConfig playCfg = { "NEW GAME",         0.5f, 0.45f, Color::White,  0.05f };
+    ButtonConfig loadCfg = { "LOAD GAME",        0.5f, 0.60f, loadColor, 0.05f };
+    ButtonConfig exitCfg = { "EXIT",             0.5f, 0.75f, Color::White,  0.05f };
 
     drawStyledButton(window, font, titleCfg);
     drawStyledButton(window, font, playCfg);

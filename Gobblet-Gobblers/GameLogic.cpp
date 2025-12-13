@@ -128,6 +128,8 @@ bool saveGameState(GameState& state, const char* filename) {
             saveFile << state.pieces[p][i] << ' ';
         saveFile << '\n';
     }
+
+    return true;
 }
 
 bool loadGameState(GameState& state, const char* filename) {
@@ -137,7 +139,7 @@ bool loadGameState(GameState& state, const char* filename) {
     if (!(file >> state.player)) return false;
 
     //read board cells in order
-    for(int i = 1; i <= squareNumber; i++)
+    for (int i = 1; i <= squareNumber; i++) {
         for (int j = 1; j <= squareNumber; j++) {
             auto& cell = state.T[i][j];
 
@@ -152,8 +154,12 @@ bool loadGameState(GameState& state, const char* filename) {
                 cell.p[k] = 0;
             }
         }
+    }
     //read each player's remaining pieces
-    for (int p = P1; p <= P2; p++)
+    for (int p = P1; p <= P2; p++) {
         for (int k = 1; k <= pieceTypes; k++)
             if (!(file >> state.pieces[p][k])) return false;
+    }
+
+    return true;
 }

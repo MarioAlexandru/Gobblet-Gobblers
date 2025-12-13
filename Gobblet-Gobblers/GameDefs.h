@@ -41,6 +41,7 @@ struct GameState {
 
 struct ButtonConfig {
     const char* text;
+    float xPerc;
     float yPerc;
     sf::Color color;
     float sizePerc;
