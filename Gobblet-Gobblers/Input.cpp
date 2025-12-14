@@ -34,8 +34,7 @@ void handleMenuInput(RenderWindow& window, GameState& state, const Event& event)
             FloatRect btnExitRect = getButtonRect(window, 0.5f, 0.75f, 0.05f, 0.2f);
 
             if (btnPlayRect.contains(mouseF)) {
-                state.appState = STATE_GAME;
-                initGame(state);
+                state.appState = STATE_SELECT_MODE;
             }
             else if (btnLoadRect.contains(mouseF))
             { 
@@ -49,6 +48,32 @@ void handleMenuInput(RenderWindow& window, GameState& state, const Event& event)
             }
             else if (btnExitRect.contains(mouseF)) {
                 window.close();
+            }
+        }
+    }
+}
+
+void handleSelectGameModeMenuInput(RenderWindow& window, GameState& state, const Event& event)
+{
+    if (const auto* mouseEvent = event.getIf<Event::MouseButtonReleased>()) {
+        if (mouseEvent->button == Mouse::Button::Left) {
+
+            Vector2i mPos = Mouse::getPosition(window);
+            Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
+
+            FloatRect btnPvpRect = getButtonRect(window, 0.5f, 0.40f, 0.05f, 0.4f);
+            FloatRect btnPveRect = getButtonRect(window, 0.5f, 0.60f, 0.05f, 0.4f);
+
+            if (btnPvpRect.contains(mouseF)) {
+                initGame(state);
+                state.appState = STATE_GAME;
+                state.gameMode = PVP;
+            }
+            else if (btnPveRect.contains(mouseF))
+            {
+                //initGame(state);
+                //state.appState = STATE_GAME;
+                //state.gameMode = PVE;
             }
         }
     }
@@ -145,12 +170,21 @@ void handleInput(RenderWindow& window, GameState& state) {
         }
 
         switch (state.appState) {
-        case STATE_MENU:
-            handleMenuInput(window, state, *event);
-            break;
-        case STATE_GAME:
-            handleGameInput(window, state, *event);
-            break;
+            case STATE_MENU:
+            {    
+                handleMenuInput(window, state, *event);
+                break;
+            }
+            case STATE_GAME:
+            {
+                handleGameInput(window, state, *event);
+                break;
+            }
+            case STATE_SELECT_MODE:
+            {
+                handleSelectGameModeMenuInput(window, state, *event);
+                break;
+            }
         }
     }
 }

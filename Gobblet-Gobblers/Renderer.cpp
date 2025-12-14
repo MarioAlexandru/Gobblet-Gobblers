@@ -192,3 +192,12 @@ void drawMenu(RenderWindow& window,GameState state, Font& font) {
     drawStyledButton(window, font, loadCfg);
     drawStyledButton(window, font, exitCfg);
 }
+
+void drawSelectGameModeMenu(RenderWindow& window, GameState state, Font& font) {
+
+    ButtonConfig pvpCfg = { "Player Vs Player",  0.5f, 0.40f, Color::White, 0.05f };
+    ButtonConfig pveCfg = { "Player Vs Computer",0.5f, 0.60f, Color(150,150,150),  0.05f};
+
+    drawStyledButton(window, font, pvpCfg);
+    drawStyledButton(window, font, pveCfg);
+}

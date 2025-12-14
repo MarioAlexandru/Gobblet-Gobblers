@@ -27,17 +27,29 @@ int main()
 
         window.clear();
 
-        if (myGame.appState == STATE_MENU) {
-            drawMenu(window, myGame, font);
-        }
-        else if (myGame.appState == STATE_GAME)
+        switch (myGame.appState) 
         {
-            drawGame(window, myGame, text, font);
-            if (checkWin(myGame)) {
-                printf("Player %d Wins!\n", abs(myGame.player-1) + 1);
-                window.close();
+            case STATE_MENU:
+            {
+                drawMenu(window, myGame, font);
+                break;
+            }
+            case STATE_SELECT_MODE:
+            {
+                drawSelectGameModeMenu(window, myGame, font);
+                break;
+            }
+            case STATE_GAME:
+            {
+                drawGame(window, myGame, text, font);
+                if (checkWin(myGame)) {
+                    printf("Player %d Wins!\n", abs(myGame.player - 1) + 1);
+                    window.close();
+                }
+                break;
             }
         }
+
         window.display();
     }
 

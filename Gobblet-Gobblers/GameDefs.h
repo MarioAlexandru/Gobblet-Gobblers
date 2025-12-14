@@ -9,9 +9,14 @@ using namespace sf;
 #define P1 0
 #define P2 1
 
+enum GameMode {
+    PVP,
+    PVE
+};
 
 enum AppState {
     STATE_MENU,
+    STATE_SELECT_MODE,
     STATE_GAME,
     STATE_SETTINGS,
     STATE_WIN
@@ -37,6 +42,7 @@ struct GameState {
     bool correctSelection;
 
     AppState appState;
+    GameMode gameMode;
 };
 
 struct ButtonConfig {
