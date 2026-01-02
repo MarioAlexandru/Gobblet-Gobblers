@@ -20,7 +20,7 @@ void centerText(Text& text, float x, float y) {
     text.setPosition({ x, y });
 }
 
-void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg, bool drawBG) {
+void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
     float scale = getScaleFactor(window);
@@ -30,6 +30,8 @@ void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg,
 
     Text txt(font, cfg.text, fontSize);
     txt.setFillColor(cfg.color);
+    txt.setOutlineThickness(static_cast<float>(fontSize)*0.1);
+    txt.setOutlineColor(Color(0,0,55,255));
 
     FloatRect bounds = txt.getLocalBounds();
     txt.setOrigin({ bounds.position.x + bounds.size.x / 2.0f, bounds.position.y + bounds.size.y / 2.0f });
@@ -38,17 +40,6 @@ void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg,
     gBounds.size.x *= 1.2f;
     gBounds.size.y *= 1.2f;
     float scaleY = scale * cfg.sizePerc * 1.5f;
-
-    if (drawBG) {
-        RectangleShape bg({ gBounds.size.x, scaleY });
-        bg.setOrigin({ gBounds.size.x / 2.f,scaleY/1.5f});
-        bg.setPosition({ winW * cfg.xPerc, winH * cfg.yPerc });
-        bg.setFillColor(Color(0, 0, 0, 155));
-        bg.setOutlineThickness(8.f);
-        bg.setOutlineColor(Color::Black);
-
-        window.draw(bg);
-    }
 
     window.draw(txt);
 }
@@ -242,12 +233,14 @@ void drawText(RenderWindow& window, TextBox object, Text& text, String& textStri
     text.setString(textString);
     FloatRect sBounds = text.getLocalBounds();
     text.setOrigin({ sBounds.size.x / 2.f, 0.f });
-    text.setPosition({ winW * 0.5f, winH * 0.5f });
+    text.setPosition({ boundingBox.getCenter().x, boundingBox.getCenter().y});
     FloatRect FBounds = text.getGlobalBounds();
-    if (boundingBox.size.x - FBounds.size.x < 25.f) {
+    float bX = boundingBox.size.x * 0.925f;
+    float bY = boundingBox.size.y * 0.925f;
+    if (bX - FBounds.size.x < 25.f) {
         text.scale({0.99f,0.99f});
     }
-    else if(boundingBox.size.y - FBounds.size.y > 55.f && (boundingBox.size.x - FBounds.size.x > 35.f)){
+    else if(bY - FBounds.size.y > 55.f && (bX - FBounds.size.x > 35.f)){
         text.scale({ 1.05f,1.05f });
     }
     
@@ -281,9 +274,9 @@ void drawPauseMenu(RenderWindow& window, GameState state,Text& text, Font& font)
     ButtonConfig resumeCfg = {"RESUME MATCH", 0.5f, 0.20f, Color::White, 0.05f};
     ButtonConfig saveCfg = { "SAVE STATE", 0.5f, 0.80f, Color::White, 0.05f };
     ButtonConfig exitCfg = { "EXIT GAME", 0.5f, 0.90f, Color::White, 0.05f };
-    drawStyledButton(window, font, resumeCfg,false);
-    drawStyledButton(window, font, saveCfg, false);
-    drawStyledButton(window, font, exitCfg, false);
+    drawStyledButton(window, font, resumeCfg);
+    drawStyledButton(window, font, saveCfg);
+    drawStyledButton(window, font, exitCfg);
 }
 
 void drawMenu(RenderWindow& window,GameState state, Font& font) {
@@ -302,11 +295,11 @@ void drawMenu(RenderWindow& window,GameState state, Font& font) {
     ButtonConfig exitCfg = { "EXIT",               0.5f, 0.75f, Color::White,  0.05f };
     ButtonConfig customizeCfg = { "CUSTOMIZATION", 0.5f, 0.9f, Color::Red,  0.06f };
 
-    drawStyledButton(window, font, titleCfg, false);
-    drawStyledButton(window, font, playCfg, true);
-    drawStyledButton(window, font, loadCfg, true);
-    drawStyledButton(window, font, exitCfg, true);
-    drawStyledButton(window, font, customizeCfg, true);
+    drawStyledButton(window, font, titleCfg);
+    drawStyledButton(window, font, playCfg);
+    drawStyledButton(window, font, loadCfg);
+    drawStyledButton(window, font, exitCfg);
+    drawStyledButton(window, font, customizeCfg);
 }
 
 void drawSelectGameModeMenu(RenderWindow& window, GameState state, Font& font) {
@@ -314,8 +307,8 @@ void drawSelectGameModeMenu(RenderWindow& window, GameState state, Font& font) {
     ButtonConfig pvpCfg = { "Player Vs Player",  0.5f, 0.40f, Color::White, 0.05f };
     ButtonConfig pveCfg = { "Player Vs Computer",0.5f, 0.60f, Color::White,  0.05f};
 
-    drawStyledButton(window, font, pvpCfg, true);
-    drawStyledButton(window, font, pveCfg, true);
+    drawStyledButton(window, font, pvpCfg);
+    drawStyledButton(window, font, pveCfg);
 }
 
 void drawSelectDifficultyMenu(RenderWindow& window, GameState state, Font& font) {
@@ -323,8 +316,8 @@ void drawSelectDifficultyMenu(RenderWindow& window, GameState state, Font& font)
     ButtonConfig randomCfg = { "Random Computer AI",  0.5f, 0.40f, Color::White, 0.05f };
     ButtonConfig strategyCfg = { "Strategy Computer AI",0.5f, 0.60f, Color::White,  0.05f };
 
-    drawStyledButton(window, font, randomCfg, true);
-    drawStyledButton(window, font, strategyCfg, true);
+    drawStyledButton(window, font, randomCfg);
+    drawStyledButton(window, font, strategyCfg);
 }
 
 FloatRect drawTextBox(RenderWindow& window, TextBox object) {
@@ -333,13 +326,13 @@ FloatRect drawTextBox(RenderWindow& window, TextBox object) {
 
     float scale = min(winW, winH)*0.9;
 
-    float posX = winW * object.pos.x;
-    float posY = winH * object.pos.y;
-    float sizeX = scale * object.size.x;
-    float sizeY = winH * object.size.y;
+    float posX = object.pos.x;
+    float posY = object.pos.y;
+    float sizeX = object.size.x;
+    float sizeY = object.size.y;
 
     RectangleShape textbox({ sizeX,sizeY });
-    textbox.setOrigin({ sizeX / 2.f, sizeY / 2.f });
+    textbox.setOrigin({ sizeX / 2.f, 0 });
     textbox.setPosition({ posX,posY });
     if (object.Focused) {
         textbox.setFillColor(Color(85, 85, 85));
@@ -350,7 +343,7 @@ FloatRect drawTextBox(RenderWindow& window, TextBox object) {
         textbox.scale({ 1.f,1.f });
     }
     textbox.setOutlineColor(Color::Black);
-    textbox.setOutlineThickness(10.f);
+    textbox.setOutlineThickness(scale*0.008f);
     window.draw(textbox);
 
     return textbox.getGlobalBounds();
@@ -360,18 +353,56 @@ void drawCustomizationMenu(RenderWindow& window, Text& text, Font& font, String&
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
+    float scale = min(winW, winH) * 0.9f;
+
+    RectangleShape p1({ winW / 2.f,winH });
+    RectangleShape p2({ winW / 2.f,winH });
+    p2.setPosition({ winW / 2.f,0.f });
+    p1.setFillColor(Color(55,155,0,55));
+    p2.setFillColor(Color(155,25,55,55));
+    p1.setOutlineColor(Color(0,0,0,200));
+    p1.setOutlineThickness(10.f);
     
 
-    ButtonConfig plrCustCfg = { "PLAYER 1'S CUSTOMIZATIONS",  0.5f, 0.20f, Color::Red, 0.05f };
-    ButtonConfig doneCfg = { "DONE CUSTOMIZING",  0.5f, 0.85f, Color::Red, 0.05f };
+    
 
-    drawStyledButton(window, font, plrCustCfg, false);
-    drawStyledButton(window, font, doneCfg, true);
+    ButtonConfig plrCustCfg = { "PLR 1'S CHARACTER",  0.25f, 0.1f, Color::Red, 0.04f };
+    ButtonConfig doneCfg = { "DONE CUSTOMIZING",  0.25f, 0.95f, Color::Red, 0.04f };
+
+    
+
+    drawStyledButton(window, font, plrCustCfg);
+    drawStyledButton(window, font, doneCfg);
 
     //TextBox plr1Box;
     //plr1Box.pos = { 0.5f,0.5f };
     //plr1Box.size = { 0.5f,0.1f };
+    
+    
+    
+
+    window.draw(p1);
+    window.draw(p2);
+
+    float dSizeY = scale*0.4f;
+    float dSizeX = dSizeY * 0.8f;
+    RectangleShape display1({dSizeX,dSizeY});
+    display1.setOrigin({ dSizeX / 2.f,0});
+    display1.setPosition({ winW*0.25f,winH*0.3f });
+    display1.setFillColor(Color::Black);
+    window.draw(display1);
+
+    ButtonConfig bodyTypeCfg = { "bodyType1",  0.25f, 0.725f, Color::White, 0.025f };
+    ButtonConfig colorPaletteCfg = { "color1",  0.25f, 0.785f, Color::White, 0.025f };
+    ButtonConfig accesoryCfg = { "accesory1",  0.25f, 0.845f, Color::White, 0.025f };
+
+    drawStyledButton(window, font, bodyTypeCfg);
+    drawStyledButton(window, font, colorPaletteCfg);
+    drawStyledButton(window, font, accesoryCfg);
+
+    textBox[0].pos = { winW*0.25f, winH * 0.15f };
+    textBox[0].size = { scale*0.45f , scale * 0.1f };
     FloatRect boundingBox = drawTextBox(window, textBox[0]);
-    if(textString.getSize()>=1)
+    if (textString.getSize() >= 1)
         drawText(window, textBox[0], text, textString, boundingBox);
 }

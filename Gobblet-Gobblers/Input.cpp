@@ -138,8 +138,10 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, const 
             Vector2i mPos = Mouse::getPosition(window);
             Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
 
-            FloatRect textBoxP1 = getTextBoxRect(window, { 0.5f,0.5f }, {0.5f,0.1f});
-            FloatRect doneButton = getButtonRect(window, 0.5f, 0.85f, 0.05f, 0.3f);
+            Vector2f size = textBox[0].size;
+            Vector2f pos = textBox[0].pos;
+            FloatRect textBoxP1 = { {pos.x-size.x/2.f,pos.y},size};
+            FloatRect doneButton = getButtonRect(window, 0.25f, 0.95f, 0.04f, 0.4f);
 
             if (textBoxP1.contains(mouseF) && !textBox[0].Focused) {
                 textBox[0].isEmpty = false;
@@ -241,7 +243,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                                 player = 1 - player;
                             }
                             else if (state.gameMode == PVE_MIMIMAX && state.matchState == STATE_PLAY) {
-                                executeMove(state,chooseBestMove(state,2));
+                                executeMove(state,chooseBestMove(state,3));
                                 printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
                                 checkWin(state, true);
                                 player = 1 - player;
@@ -261,7 +263,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                                 player = 1 - player;
                             }
                             else if (state.gameMode == PVE_MIMIMAX && state.matchState == STATE_PLAY) {
-                                executeMove(state, chooseBestMove(state, 2));
+                                executeMove(state, chooseBestMove(state, 3));
                                 printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
                                 checkWin(state, true);
                                 player = 1 - player;

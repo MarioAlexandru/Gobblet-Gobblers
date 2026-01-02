@@ -45,7 +45,7 @@ void initGame(GameState& state) {
 void initCustomize(TextBox textBox[]) {
     textBox[0].Focused = false;
     textBox[0].isEmpty = true;
-    textBox[0].pos = {0.5f,0.5f};
+    textBox[0].pos = {0.1f,0.25f};
     textBox[0].size = { 0.5f,0.1f };
 
     //Plr 2's textbox
