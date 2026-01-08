@@ -10,20 +10,13 @@ using namespace std;
 int main()
 {
     RenderWindow window(VideoMode({ 1000, 1000 }), "Gobblet Gobblers", Style::Default);
-    window.setFramerateLimit(60);
-
-    Shader gradient;
-    if (!gradient.loadFromFile("multiGradient.frag", sf::Shader::Type::Fragment))
-    {
-        return -1;
-    }
+    //window.setFramerateLimit(60);
 
     GameState myGame;
-    TextBox tb[2];//for listening to keyboard input / when typing plr name
     initGame(myGame);
     myGame.appState = STATE_MENU;
-    int winner;
 
+    arrowSet arrows[8];
     Font font;
     if (!font.openFromFile("Minecraftia-Regular.ttf")) return -1;
 
@@ -32,30 +25,34 @@ int main()
     text.setFillColor(Color::Red);
 
     // Scrolling parameters
-    int scrollSpeedFrames = 3;  // shift every 3 frames ¨ slower scroll
-    int frameCounter = 0;
-    int offsetX = 0;
+    float scrollSpeed = 30.f;  // pixels per second
+    float offsetX = 0;
     const int tileSize = 164;
 
     String temporary;
 
+    Clock clock;
+
     while (window.isOpen())
     {
-        handleInput(window, myGame, temporary, tb);
+        float dt = clock.restart().asSeconds();
+        float fps = 1.0f / dt;
+
+        handleInput(window, myGame, arrows, temporary);
 
         window.clear();
 
-        if (++frameCounter >= scrollSpeedFrames)
-        {
-            frameCounter = 0;
-            offsetX = (offsetX + 1) % tileSize;  // wrap at 82
-        }
+        offsetX += scrollSpeed * dt;  // wrap at 82
 
-        int tx = (-offsetX) % tileSize;
+        offsetX = fmod(offsetX, static_cast<float>(tileSize));
+        if (offsetX < 0) offsetX += tileSize;
+
+        int tx = static_cast<int>(-offsetX) % tileSize;
         if (tx < 0) tx += tileSize; // ensure positive modulo
         int ty = offsetX;
 
         drawBackground(window, tx, ty);
+        
 
         switch (myGame.appState) 
         {
@@ -84,16 +81,22 @@ int main()
                     drawPauseMenu(window, myGame, text, font);
                 }
                 else if (myGame.matchState == STATE_WIN) {
-                    //nothing rn
+                    drawWinMenu(window, myGame, text, font);
                 }
                 break;
             }
             case STATE_CUSTOMIZATION:
             {
-                drawCustomizationMenu(window, text, font, temporary, tb);
+                drawCustomizationMenu(window, myGame, arrows, text, font);
+                break;
+            }
+            case STATE_SAVE_HIGHSCORE: 
+            {
+                drawSaveToLeaderboard(window, myGame, text, font, temporary);
                 break;
             }
         }
+        //displayFPS(window, font, fps);
         window.display();
     }
 

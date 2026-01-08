@@ -2,7 +2,7 @@
 #include "GameDefs.h"
 
 void initGame(GameState& state);
-void initCustomize(TextBox textBox[]);
+void defaultCustomization(Character characters[]);
 void togglePause(GameState& state);
 int getCurrentPlayTime(const GameState& state);
 int sign(int x); // Helper

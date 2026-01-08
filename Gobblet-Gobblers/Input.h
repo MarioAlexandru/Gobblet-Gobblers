@@ -3,4 +3,4 @@
 #include <SFML/System.hpp>
 #include "GameDefs.h"
 
-void handleInput(RenderWindow& window, GameState& state, String& inputBuffer, TextBox textBox[]);
+void handleInput(RenderWindow& window, GameState& state, arrowSet arrows[], String& inputBuffer);

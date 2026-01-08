@@ -15,8 +15,12 @@ void initGame(GameState& state) {
     state.matchState = STATE_PLAY;
     state.startTime = time(nullptr);
     state.totalElapsedSec = 0;
-    state.focusTB = false;
+    
+    //separate function would be good
+    state.tb.Focused = false;
+    state.tb.isEmpty = true;
 
+    state.winner = -1;
     state.scoreP1 = 0;
     state.scoreP2 = 0;
 
@@ -42,24 +46,27 @@ void initGame(GameState& state) {
     }
 }
 
-void initCustomize(TextBox textBox[]) {
-    textBox[0].Focused = false;
-    textBox[0].isEmpty = true;
-    textBox[0].pos = {0.1f,0.25f};
-    textBox[0].size = { 0.5f,0.1f };
+void defaultCustomization(Character characters[]) {
+    characters[P1].bodyColor = 0;
+    characters[P1].size = 1;
 
-    //Plr 2's textbox
-    textBox[1].Focused = false;
-    textBox[1].isEmpty = true;
-    textBox[1].pos = { 0.8f,0.1f };
-    textBox[1].size = { 0.3f,0.05f };
+    characters[P1].palette[0] = Color(177, 62, 83);
+    characters[P1].palette[1] = Color(255, 205, 117);
+    characters[P1].palette[2] = Color(167, 240, 112);
+
+    characters[P2].bodyColor = 0;
+    characters[P2].size = 1;
+
+    characters[P2].palette[0] = Color(93, 39, 93);
+    characters[P2].palette[1] = Color(239, 125, 87);
+    characters[P2].palette[2] = Color(56, 183, 100);
 }
 
 void togglePause(GameState& state) {
     if (state.matchState == STATE_PAUSED) {
         // Resume: set new start time
         state.startTime = time(nullptr);
-        if (state.scoreP1 != 0) {
+        if (state.scoreP1 != 0 || state.scoreP2 !=0) {
             state.matchState = STATE_WIN;
         }
         else {
@@ -151,6 +158,7 @@ void gameWon(GameState& state, int winner) {
     printf("Player 1 scored: %d points!\n", state.scoreP1);
     printf("Player 2 scored: %d points!\n", state.scoreP2);
     state.matchState = STATE_WIN;
+    state.winner = winner;
     //window.close();
 }
 
