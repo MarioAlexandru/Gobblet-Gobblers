@@ -28,14 +28,21 @@ void initGame(GameState& state) {
     state.pieceSize = 1;
     state.waitingForLeftClick = false;
     state.correctSelection = false;
+    state.heldDown = false;
     state.old_line = -20;
     state.old_col = -20;
 
+    state.board.size = 500.f;
+    state.board.pos = { 0.f,0.f };
+    //state.board.squareNr = 3;
+
     for (int i = 0; i <= squareNumber; i++) {
         for (int j = 0; j <= squareNumber; j++) {
-            state.T[i][j].nr = 0;
+            state.board.T[i][j].nr = 0;
+            //state.T[i][j].nr = 0;
             for (int k = 0; k <= squareNumber; k++) {
-                state.T[i][j].p[k] = 0;
+                state.board.T[i][j].p[k] = 0;
+                //state.T[i][j].p[k] = 0;
             }
         }
     }
@@ -47,19 +54,19 @@ void initGame(GameState& state) {
 }
 
 void defaultCustomization(Character characters[]) {
-    characters[P1].bodyColor = 0;
-    characters[P1].size = 1;
+    for (int p = P1; p <= P2; p++) {
+        characters[p].bodyColor = 0;
+        characters[p].size = 1;
 
-    characters[P1].palette[0] = Color(177, 62, 83);
-    characters[P1].palette[1] = Color(255, 205, 117);
-    characters[P1].palette[2] = Color(167, 240, 112);
-
-    characters[P2].bodyColor = 0;
-    characters[P2].size = 1;
-
-    characters[P2].palette[0] = Color(93, 39, 93);
-    characters[P2].palette[1] = Color(239, 125, 87);
-    characters[P2].palette[2] = Color(56, 183, 100);
+        characters[p].palette[0] = Color(177,62,63-40);
+        characters[p].palette[1] = Color(239,125,87 - 40);
+        characters[p].palette[2] = Color(255,205,117 - 40);
+        characters[p].palette[3] = Color(167,240,112 - 40);
+        characters[p].palette[4] = Color(56,183,100 - 40);
+        characters[p].palette[5] = Color(37,113,121 - 40);
+        characters[p].palette[6] = Color(41,54,111 - 40);
+        characters[p].palette[7] = Color(93,39,93 - 40);
+    }
 }
 
 void togglePause(GameState& state) {
@@ -96,7 +103,7 @@ int getCurrentPlayTime(const GameState& state) {
 }
 
 bool punePiesa(GameState& state, int linia, int coloana, int piece, bool movingPiece) {
-    auto& T = state.T;
+    auto& T = state.board.T;
     int player = P1;
     if (piece < 0)
         player = P2;
@@ -136,7 +143,7 @@ bool punePiesa(GameState& state, int linia, int coloana, int piece, bool movingP
 }
 
 bool movePiece(GameState& state, int old_l, int old_c, int new_l, int new_c) {
-    auto& T = state.T;
+    auto& T = state.board.T;
     int varf = T[old_l + 1][old_c + 1].nr;
 
     int pieceVal = T[old_l + 1][old_c + 1].p[varf];
@@ -163,7 +170,7 @@ void gameWon(GameState& state, int winner) {
 }
 
 int checkWin(GameState& state, bool returnWin) {
-    const auto& T = state.T;
+    const auto& T = state.board.T;
     int winner = -1;
 
     for (int i = 1; i <= 3; i++) {
@@ -203,12 +210,14 @@ int evaluate(GameState& state, int player) {
         {{1,1},{2,2},{3,3}}, {{1,3},{2,2},{3,1}}  // diags
     };
 
+    auto& T = state.board.T;
+
     for (int i = 0; i < 8; i++) {
         int own = 0, opp = 0;
         for (int j = 0; j < 3; j++) {
             int r = lines[i][j][0], c = lines[i][j][1];
-            if (state.T[r][c].nr > 0) {
-                int top = state.T[r][c].p[state.T[r][c].nr];
+            if (T[r][c].nr > 0) {
+                int top = T[r][c].p[T[r][c].nr];
                 if (top > 0 && player == P1) own++;
                 else if (top < 0 && player == P2) own++;
                 else opp++;
@@ -220,7 +229,7 @@ int evaluate(GameState& state, int player) {
     }
 
     // Bonus for larger pieces on board & center control
-    int center = state.T[2][2].nr > 0 ? state.T[2][2].p[state.T[2][2].nr] : 0;
+    int center = T[2][2].nr > 0 ? T[2][2].p[T[2][2].nr] : 0;
     if ((center > 0 && player == P1) || (center < 0 && player == P2))
         score += abs(center) * 5;
 
@@ -265,7 +274,7 @@ int generateMoves(GameState& state, Move out[], int maxMoves) {
             int piece = pieceSign * size;
             for (int r = 1; r <= squareNumber; ++r) {
                 for (int c = 1; c <= squareNumber; ++c) {
-                    stiva& cell = state.T[r][c];
+                    stiva& cell = state.board.T[r][c];
                     if (cell.nr >= 3) continue;
                     if (cell.nr == 0 || abs(piece) > abs(cell.p[cell.nr])) {
                         if (count < maxMoves) {
@@ -284,7 +293,7 @@ int generateMoves(GameState& state, Move out[], int maxMoves) {
     // Generate valid moves
     for (int old_r = 1; old_r <= squareNumber; ++old_r) {
         for (int old_c = 1; old_c <= squareNumber; ++old_c) {
-            stiva& src = state.T[old_r][old_c];
+            stiva& src = state.board.T[old_r][old_c];
             if (src.nr == 0) continue;
             int topPiece = src.p[src.nr];
             // Check ownership
@@ -294,7 +303,7 @@ int generateMoves(GameState& state, Move out[], int maxMoves) {
             for (int new_r = 1; new_r <= squareNumber; ++new_r) {
                 for (int new_c = 1; new_c <= squareNumber; ++new_c) {
                     if (old_r == new_r && old_c == new_c) continue;
-                    stiva& dst = state.T[new_r][new_c];
+                    stiva& dst = state.board.T[new_r][new_c];
                     if (dst.nr >= 3) continue;
                     if (dst.nr == 0 || abs(topPiece) > abs(dst.p[dst.nr])) {
                         if (count < maxMoves) {
@@ -414,7 +423,7 @@ bool saveGameState(GameState& state, const char* filename) {
     //Board order
     for (int i = 1; i <= squareNumber; i++)
         for (int j = 1; j <= squareNumber; j++) {
-            const auto& cell = state.T[i][j];
+            const auto& cell = state.board.T[i][j];
 
             saveFile << cell.nr;
             for (int k = 1; k <= cell.nr; k++) {
@@ -449,7 +458,7 @@ bool loadGameState(GameState& state, const char* filename) {
     //read board cells in order
     for (int i = 1; i <= squareNumber; i++) {
         for (int j = 1; j <= squareNumber; j++) {
-            auto& cell = state.T[i][j];
+            auto& cell = state.board.T[i][j];
 
             if (!(file >> cell.nr)) return false;
             if (cell.nr < 0 || cell.nr > pieceTypes) return false;

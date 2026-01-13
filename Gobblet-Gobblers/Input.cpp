@@ -198,11 +198,11 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
             }
             else if (smallArrow0.contains(mouseF)) {
                 state.character[P1].bodyColor -= 1;
-                if (state.character[P1].bodyColor < 0) state.character[P1].bodyColor = 2;
+                if (state.character[P1].bodyColor < 0) state.character[P1].bodyColor = 7;
             }
             else if (smallArrow1.contains(mouseF)) {
                 state.character[P1].bodyColor += 1;
-                if (state.character[P1].bodyColor > 2) state.character[P1].bodyColor = 0;
+                if (state.character[P1].bodyColor > 7) state.character[P1].bodyColor = 0;
             }
             else if (state.gameMode == PVP) {
                 if (bigArrow2.contains(mouseF)) {
@@ -215,11 +215,11 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
                 }
                 else if (smallArrow2.contains(mouseF)) {
                     state.character[P2].bodyColor -= 1;
-                    if (state.character[P2].bodyColor < 0) state.character[P2].bodyColor = 2;
+                    if (state.character[P2].bodyColor < 0) state.character[P2].bodyColor = 7;
                 }
                 else if (smallArrow3.contains(mouseF)) {
                     state.character[P2].bodyColor += 1;
-                    if (state.character[P2].bodyColor > 2) state.character[P2].bodyColor = 0;
+                    if (state.character[P2].bodyColor > 7) state.character[P2].bodyColor = 0;
                 }
             }
         }
@@ -281,7 +281,7 @@ void handleSaveScoreInput(RenderWindow& window, GameState& state, const Event& e
 }
 
 void handleGameInput(RenderWindow& window, GameState& state, const Event& event) {
-    auto& T = state.T;
+    auto& T = state.board.T;
     auto& player = state.player;
     auto& pieceSize = state.pieceSize;
     auto& waitingForLeftClick = state.waitingForLeftClick;
@@ -292,10 +292,10 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
-    float currentTableSize = std::min(winW, winH) * 0.8f;
-    float boardX = (winW - currentTableSize) / 2.f;
-    float boardY = (winH - currentTableSize) / 2.f;
-    float latura = currentTableSize / static_cast<float>(squareNumber);
+    auto boardSize = state.board.size;
+    auto boardX = state.board.pos.x;
+    auto boardY = state.board.pos.y;
+    float latura = boardSize / squareNumber;
 
     if (const auto* key = event.getIf<Event::KeyReleased>()) {
         if (state.matchState != STATE_WIN && key->scancode == Keyboard::Scancode::Escape) {
@@ -307,12 +307,24 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
         }
     }
 
+    if (const auto* buttonHeldDown = event.getIf<Event::MouseButtonPressed>()) {
+        Vector2i mPos = Mouse::getPosition(window);
+        Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
+        if (buttonHeldDown->button == Mouse::Button::Middle) {
+            state.heldDown = true;
+        }
+    }
+
     if (const auto* buttonReleased = event.getIf<Event::MouseButtonReleased>()) {
         Vector2i mPos = Mouse::getPosition(window);
         Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
 
-        int line = static_cast<int>((mPos.y - boardY) / latura);
-        int col = static_cast<int>((mPos.x - boardX) / latura);
+        int line = -20, col = -20;
+
+        if (mouseF.x >= boardX && mouseF.y >= boardY) {
+            line = static_cast<int>((mPos.y - boardY) / latura);
+            col = static_cast<int>((mPos.x - boardX) / latura);
+        }
 
         if (state.matchState == STATE_PLAY) {
             if (buttonReleased->button == Mouse::Button::Right && !waitingForLeftClick) {
@@ -376,6 +388,9 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
             else if (buttonReleased->button == Mouse::Button::Right) {
                 waitingForLeftClick = false; correctSelection = false;
                 old_line = -20; old_col = -20;
+            }
+            else if (buttonReleased->button == Mouse::Button::Middle && state.heldDown) {
+                state.heldDown = false;
             }
         }
         else if (state.matchState == STATE_PAUSED) { //pauseMenu

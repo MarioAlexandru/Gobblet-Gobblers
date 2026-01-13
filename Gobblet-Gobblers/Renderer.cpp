@@ -156,18 +156,25 @@ void drawCharacter(RenderWindow& window, float posX, float posY, float scaleFact
     window.draw(face);
 }
 
-void drawCell(RenderWindow& window, const GameState& state, int line, int col, float latura, float boardX, float boardY) {
-    int varf = state.T[line + 1][col + 1].nr;
-    int valPiesa = state.T[line + 1][col + 1].p[varf];
+void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
+    auto board = state.board;
+    auto& T = board.T;
+    auto boardX = board.pos.x;
+    auto boardY = board.pos.y;
+
+    int varf = T[line + 1][col + 1].nr;
+    int valPiesa = T[line + 1][col + 1].p[varf];
     int pieceSize = abs(valPiesa);
 
     int player;
 
     if (valPiesa == 0) return;
 
+    float latura = board.size / squareNumber;
+
     float centerX = boardX + col * latura ;
     float centerY = boardY + line * latura ;
-
+    
     float scale = latura / 32.f;
 
     if (valPiesa < 0) {
@@ -199,23 +206,58 @@ void highlightSquare(RenderWindow& window, int col, int line) {
     window.draw(square);
 }
 
-void drawTable(RenderWindow& window, const GameState& state) {
+void drawRemainingPieces(RenderWindow& window, const GameState& state, float scaleFactor, int player) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
-    float currentTableSize = std::min(winW, winH) * 0.8f;
+    float scale = std::min(winW, winH) * 0.8f;
+    
+    float latura = state.board.size/3;
+    float startY = state.board.pos.y;
 
+    float startX = winW * 0.05f;
 
-    float boardX = (winW - currentTableSize) / 2.0f;
-    float boardY = (winH - currentTableSize) / 2.0f;
+    float posX;
 
-    float latura = currentTableSize / squareNumber;
+    if (player == P1) {
+        posX = 0.025 * winW;
+    }
+    else {
+        posX = winW * 0.975 - latura;
+    }
+
+    if (player != state.player || !state.heldDown) {
+        for (int i = 1; i <= 3; i++) {
+            drawCharacter(window, posX, startY + latura * (i - 1), scaleFactor, i, state.character[player]);
+        }
+    }
+}
+
+void drawTable(RenderWindow& window, GameState& state) {
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+
+    auto& boardSize = state.board.size;
+    auto& boardX = state.board.pos.x;
+    auto& boardY = state.board.pos.y;
+
+    if (winH < winW*0.75f) {
+        boardSize = winH * 0.8f;
+    }
+    else {
+        boardSize = winW * 0.5f;
+    }
+
+    boardX = (winW - boardSize) / 2.0f;
+    boardY = (winH - boardSize) / 2.0f;
+
+    float latura = boardSize / squareNumber;
 
     Texture spritesheet("spritesheet.png");
     Sprite boardSquare(spritesheet);
     boardSquare.setTextureRect(IntRect({ 96,0 }, { 32,32 }));
 
-    float sizeScale = latura / 32;
+    float sizeScale = latura / 32.f;
     boardSquare.scale({ sizeScale,sizeScale });
 
     // Desenăm grila
@@ -224,8 +266,17 @@ void drawTable(RenderWindow& window, const GameState& state) {
             boardSquare.setPosition({ boardX + j * (latura), boardY + i * latura });
             window.draw(boardSquare);
 
-            drawCell(window, state, i, j, latura, boardX, boardY);
+            drawCell(window, state, i, j);
         }
+    }
+    Vector2i mPos = Mouse::getPosition(window);
+    Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
+
+    drawRemainingPieces(window, state, latura / 32.f, P1);
+    drawRemainingPieces(window, state, latura / 32.f, P2);
+
+    if (state.heldDown) {
+        drawCharacter(window, mouseF.x-latura/2.f, mouseF.y-latura/2.f, latura / 32.f, state.pieceSize, state.character[state.player]);
     }
 }
 
@@ -251,7 +302,7 @@ void drawBackground(RenderWindow& window, int offsetx, int offsety) {
     window.draw(scrollBackground);
 }
 
-void drawGame(RenderWindow& window, const GameState& state, Text& text, Font& font) {
+void drawGame(RenderWindow& window, GameState& state, Text& text, Font& font) {
     auto player = state.player;
 
     float winW = static_cast<float>(window.getSize().x);
@@ -549,7 +600,9 @@ void drawPlrCustomize(RenderWindow& window, Character character, arrowSet arrows
 
     arrows[4 * player + 1].pos.y = 0.725f*winH;
     drawScrollArrows(window, arrows[4 * player + 1]);
-    ButtonConfig colorPaletteCfg = { "color1",  xPerc, 0.785f, Color::White, 0.025f };
+    string ccolor = "Color ";
+    ccolor += to_string(character.bodyColor);
+    ButtonConfig colorPaletteCfg = { ccolor.c_str(),  xPerc, 0.785f, Color::White, 0.025f};
 
     arrows[4 * player + 2].pos.y = 0.785f * winH;
     drawScrollArrows(window, arrows[4 * player + 2]);

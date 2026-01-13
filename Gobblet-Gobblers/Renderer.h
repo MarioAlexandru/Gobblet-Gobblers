@@ -8,7 +8,7 @@ void displayFPS(RenderWindow& window, Font& font, float fpsCounter);
 
 void drawBackground(sf::RenderWindow & window, int offsetx, int offsety);
 
-void drawGame(sf::RenderWindow& window, const GameState& state, sf::Text& text, sf::Font& font);
+void drawGame(sf::RenderWindow& window, GameState& state, sf::Text& text, sf::Font& font);
 void drawPauseMenu(RenderWindow& window, GameState state, Text& text, Font& font);
 void drawWinMenu(RenderWindow& window, GameState state, Text& text, Font& font);
 
@@ -18,6 +18,7 @@ void drawSelectDifficultyMenu(RenderWindow& window, GameState state, Font& font)
 void drawCustomizationMenu(RenderWindow& window, GameState& state, arrowSet arrows[], Text& text, Font& font);
 void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, Font font, String& textString);
 
+void drawCharacter(RenderWindow& window, float posX, float posY, float scaleFactor, int pieceSize, Character character);
 void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg);
 
 

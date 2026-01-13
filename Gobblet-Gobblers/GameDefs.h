@@ -46,6 +46,13 @@ struct stiva {
     int nr;
 };
 
+struct boardObj {
+    stiva T[5][5];
+    int squareNr;
+    Vector2f pos;
+    float size;
+};
+
 //possible moves structure
 struct Move {
     int type; // 0=place, 1=move
@@ -55,7 +62,7 @@ struct Move {
 struct Character {
     int bodyType;
     int bodyColor;
-    Color palette[3];
+    Color palette[8];
     int accessory;
     int size;
 };
@@ -69,7 +76,8 @@ struct TextBox {
 
 struct GameState {
     // Board Data
-    stiva T[squareNumber+1][squareNumber+1];
+    boardObj board;
+    //stiva T[squareNumber+1][squareNumber+1];
     int player;
     int pieces[2][4];
 
@@ -79,6 +87,7 @@ struct GameState {
     int old_col;
     bool waitingForLeftClick;
     bool correctSelection;
+    bool heldDown;
 
     //score data
     int winner;
