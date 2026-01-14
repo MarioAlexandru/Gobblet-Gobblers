@@ -100,8 +100,6 @@ struct GameState {
     time_t startTime;
     int totalElapsedSec;
 
-    interpolatingPiece interpolating;
-
     //player data
     String name[2];
     Character character[2];
