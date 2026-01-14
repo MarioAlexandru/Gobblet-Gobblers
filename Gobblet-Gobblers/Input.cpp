@@ -302,17 +302,60 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
         if (state.matchState != STATE_WIN && key->scancode == Keyboard::Scancode::Escape) {
             togglePause(state);
         }
-        if (state.matchState == STATE_PLAY) {
+        /*if (state.matchState == STATE_PLAY) {
             if (key->scancode == Keyboard::Scancode::Up && pieceSize < 3) pieceSize++;
             else if (key->scancode == Keyboard::Scancode::Down && pieceSize > 1) pieceSize--;
-        }
+        }*/
     }
 
     if (const auto* buttonHeldDown = event.getIf<Event::MouseButtonPressed>()) {
         Vector2i mPos = Mouse::getPosition(window);
         Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
-        if (buttonHeldDown->button == Mouse::Button::Middle) {
-            state.heldDown = true;
+        if (buttonHeldDown->button == Mouse::Button::Left && !state.heldDown) {
+            Vector2i mPos = Mouse::getPosition(window);
+            Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
+            FloatRect pieces[3];
+            float posX;
+            float startY = state.board.pos.y;
+
+            if (player == P1) {
+                posX = 0.025 * winW;
+            }
+            else {
+                posX = winW * 0.975 - latura;
+            }
+            for (int p = 0; p < 3; p++) {
+                pieces[p] = drawCharacter(window, posX, startY + latura * p, latura / 32.f, p+1, state.character[player], false, false);
+            }
+            correctSelection = false;
+            if (pieces[0].contains(mouseF)) {
+                state.heldDown = true;
+                pieceSize = 1;
+            }
+            else if (pieces[1].contains(mouseF)) {
+                state.heldDown = true;
+                pieceSize = 2;
+            }
+            else if (pieces[2].contains(mouseF)) {
+                state.heldDown = true;
+                pieceSize = 3;
+            }
+            else if (mouseF.x >= boardX && mouseF.x <= boardX + state.board.size && mouseF.y >= boardY && mouseF.y <= boardY + state.board.size) {
+                int line = static_cast<int>((mPos.y - boardY) / latura);
+                int col = static_cast<int>((mPos.x - boardX) / latura);
+                if (T[line+1][col+1].nr > 0) {
+                    if (player == P1 && sign(T[line + 1][col + 1].p[T[line + 1][col + 1].nr]) == 1 || player == P2 && sign(T[line + 1][col + 1].p[T[line + 1][col + 1].nr]) == -1) {
+                        state.heldDown = true;
+
+                        pieceSize = abs(T[line + 1][col + 1].p[T[line + 1][col + 1].nr]);
+                        correctSelection = true;
+                        old_line = line;
+                        old_col = col;
+                    }
+                }
+
+            }
+
         }
     }
 
@@ -322,76 +365,57 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
 
         int line = -20, col = -20;
 
-        if (mouseF.x >= boardX && mouseF.y >= boardY) {
-            line = static_cast<int>((mPos.y - boardY) / latura);
-            col = static_cast<int>((mPos.x - boardX) / latura);
-        }
-
         if (state.matchState == STATE_PLAY) {
-            if (buttonReleased->button == Mouse::Button::Right && !waitingForLeftClick) {
-                if (line >= 0 && line < squareNumber && col >= 0 && col < squareNumber) {
-                    int varf = T[line + 1][col + 1].nr;
-                    int pVal = T[line + 1][col + 1].p[varf];
-
-                    if ((sign(pVal) == 1 && player == P1) || (sign(pVal) == -1 && player == P2)) {
-                        old_line = line;
-                        old_col = col;
-                        correctSelection = true;
-                    }
-                    waitingForLeftClick = true;
-                }
-            }
-            else if (buttonReleased->button == Mouse::Button::Left) {
-                if (line >= 0 && line < squareNumber && col >= 0 && col < squareNumber) {
-                    if (waitingForLeftClick && correctSelection) {
+            if (buttonReleased->button == Mouse::Button::Left && state.heldDown) {
+                if(!correctSelection) state.heldDown = false;
+                if (mouseF.x >= boardX && mouseF.x <= boardX + state.board.size && mouseF.y >= boardY && mouseF.y <= boardY + state.board.size) {
+                    line = static_cast<int>((mPos.y - boardY) / latura);
+                    col = static_cast<int>((mPos.x - boardX) / latura);
+                    if (correctSelection) {
                         if (movePiece(state, old_line, old_col, line, col)) {
-                            printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
-                            checkWin(state,true);
+                            old_line = -20; old_col = -20;
+                            correctSelection = false;
+                            state.heldDown = false;
+                            //printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
+                            checkWin(state, true);
                             player = 1 - player;
                             if (state.gameMode == PVE_RAND && state.matchState == STATE_PLAY) {
                                 makeRandomMove(state);
-                                printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
-                                checkWin(state,true);
-                                player = 1 - player;
-                            }
-                            else if (state.gameMode == PVE_MIMIMAX && state.matchState == STATE_PLAY) {
-                                executeMove(state,chooseBestMove(state,3));
-                                printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
+                                //printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
                                 checkWin(state, true);
-                                player = 1 - player;
-                            }
-                        }
-                    }
-                    else if (!waitingForLeftClick) {
-                        int val = (player == P1) ? pieceSize : -1 * pieceSize;
-                        if (punePiesa(state, line + 1, col + 1, val, false)) {
-                            printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
-                            checkWin(state,true);
-                            player = 1 - player;
-                            if (state.gameMode == PVE_RAND && state.matchState == STATE_PLAY) {
-                                makeRandomMove(state);
-                                printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
-                                checkWin(state,true);
                                 player = 1 - player;
                             }
                             else if (state.gameMode == PVE_MIMIMAX && state.matchState == STATE_PLAY) {
                                 executeMove(state, chooseBestMove(state, 3));
-                                printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
+                                //printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
                                 checkWin(state, true);
                                 player = 1 - player;
                             }
                         }
                     }
-                }
-                old_line = -20; old_col = -20;
-                waitingForLeftClick = false; correctSelection = false;
-            }
-            else if (buttonReleased->button == Mouse::Button::Right) {
-                waitingForLeftClick = false; correctSelection = false;
-                old_line = -20; old_col = -20;
-            }
-            else if (buttonReleased->button == Mouse::Button::Middle && state.heldDown) {
-                state.heldDown = false;
+                    else {
+                        int val = (player == P1) ? pieceSize : -1 * pieceSize;
+                        if (punePiesa(state, line + 1, col + 1, val, false)) {
+                            old_line = -20; old_col = -20;
+                            correctSelection = false;
+                            //printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
+                            checkWin(state, true);
+                            player = 1 - player;
+                            if (state.gameMode == PVE_RAND && state.matchState == STATE_PLAY) {
+                                makeRandomMove(state);
+                                //printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
+                                checkWin(state, true);
+                                player = 1 - player;
+                            }
+                            else if (state.gameMode == PVE_MIMIMAX && state.matchState == STATE_PLAY) {
+                                executeMove(state, chooseBestMove(state, 3));
+                                //printf("Current state has a value of: %d, for player %d\n", evaluate(state, P2), P2 + 1);
+                                checkWin(state, true);
+                                player = 1 - player;
+                            }
+                        }
+                    }
+                } 
             }
         }
         else if (state.matchState == STATE_PAUSED) { //pauseMenu

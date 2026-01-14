@@ -125,7 +125,7 @@ void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg)
     window.draw(txt);
 }
 
-void drawCharacter(RenderWindow& window, float posX, float posY, float scaleFactor, int pieceSize, Character character) {
+FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scaleFactor, int pieceSize, Character character, bool draw, bool unavailable) {
     Texture spritesheet("spritesheet.png");
     Sprite body(spritesheet);
     Sprite face(spritesheet);
@@ -152,8 +152,19 @@ void drawCharacter(RenderWindow& window, float posX, float posY, float scaleFact
 
     body.setColor(character.palette[character.bodyColor]);
 
-    window.draw(body);
-    window.draw(face);
+    if (unavailable) {
+        uint32_t R = character.palette[character.bodyColor].r;
+        uint32_t G = character.palette[character.bodyColor].r;
+        uint32_t B = character.palette[character.bodyColor].r;
+        body.setColor(Color(R, G, B, 100));
+        face.setColor(Color(R, G, B, 100));
+    }
+
+    if (draw) {
+        window.draw(body);
+        window.draw(face);
+    }
+    return body.getGlobalBounds();
 }
 
 void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
@@ -163,6 +174,9 @@ void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
     auto boardY = board.pos.y;
 
     int varf = T[line + 1][col + 1].nr;
+    if (line == state.old_line && col == state.old_col) {
+        varf--;
+    }
     int valPiesa = T[line + 1][col + 1].p[varf];
     int pieceSize = abs(valPiesa);
 
@@ -184,7 +198,7 @@ void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
         player = P1;
     }
 
-    drawCharacter(window, centerX, centerY, scale, pieceSize, state.character[player]);
+    drawCharacter(window, centerX, centerY, scale, pieceSize, state.character[player], true, false);
 }
 
 void highlightSquare(RenderWindow& window, int col, int line) {
@@ -226,9 +240,14 @@ void drawRemainingPieces(RenderWindow& window, const GameState& state, float sca
         posX = winW * 0.975 - latura;
     }
 
-    if (player != state.player || !state.heldDown) {
+    if (player == state.player) {
         for (int i = 1; i <= 3; i++) {
-            drawCharacter(window, posX, startY + latura * (i - 1), scaleFactor, i, state.character[player]);
+            drawCharacter(window, posX, startY + latura * (i - 1), scaleFactor, i, state.character[player], true, false);
+        }
+    }
+    else {
+        for (int i = 1; i <= 3; i++) {
+            drawCharacter(window, posX, startY + latura * (i - 1), scaleFactor, i, state.character[player], true, true);
         }
     }
 }
@@ -276,11 +295,23 @@ void drawTable(RenderWindow& window, GameState& state) {
     drawRemainingPieces(window, state, latura / 32.f, P2);
 
     if (state.heldDown) {
-        drawCharacter(window, mouseF.x-latura/2.f, mouseF.y-latura/2.f, latura / 32.f, state.pieceSize, state.character[state.player]);
+        drawCharacter(window, mouseF.x-latura/2.f, mouseF.y-latura/2.f, latura / 32.f, state.pieceSize, state.character[state.player], true, false);
     }
 }
 
-void drawBackground(RenderWindow& window, int offsetx, int offsety) {
+void drawMainBG(RenderWindow& window, Sprite background, Sprite title, Sprite detail1) {
+    float winW = static_cast<float>(window.getSize().x);
+    float winH = static_cast<float>(window.getSize().y);
+    background.setScale({ winH / 270.f, winH / 270.f });
+    background.setTextureRect(IntRect({0,0}, { 2000, 270 }));
+    title.setScale({ winW / 480.f, winH / 270.f });
+    detail1.setScale({ winW / 480.f, winH / 270.f });
+    window.draw(background);
+    window.draw(detail1);
+    window.draw(title);
+}
+
+void drawScrollBG(RenderWindow& window, int offsetx, int offsety) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
@@ -450,12 +481,12 @@ void drawMenu(RenderWindow& window,GameState state, Font& font) {
     if (saveExists)
         loadColor = Color::White;
 
-    ButtonConfig titleCfg = { "GOBBLET GOBBLERS",  0.5f, 0.20f, Color::Yellow, 0.08f };
+    //ButtonConfig titleCfg = { "GOBBLET GOBBLERS",  0.5f, 0.20f, Color::Yellow, 0.08f };
     ButtonConfig playCfg = { "NEW GAME",           0.5f, 0.45f, Color::White,  0.05f };
     ButtonConfig loadCfg = { "LOAD GAME",          0.5f, 0.60f, loadColor, 0.05f };
     ButtonConfig exitCfg = { "EXIT",               0.5f, 0.75f, Color::White,  0.05f };
 
-    drawStyledButton(window, font, titleCfg);
+    //drawStyledButton(window, font, titleCfg);
     drawStyledButton(window, font, playCfg);
     drawStyledButton(window, font, loadCfg);
     drawStyledButton(window, font, exitCfg);
@@ -576,7 +607,7 @@ void drawPlrCustomize(RenderWindow& window, Character character, arrowSet arrows
     window.draw(display1);
     float bigArrowSize = dSizeX / 32.f;
     FloatRect displayBounds = display1.getGlobalBounds();
-    drawCharacter(window, displayBounds.position.x, displayBounds.position.y+dSizeX/4.f, bigArrowSize, character.size, character);
+    drawCharacter(window, displayBounds.position.x, displayBounds.position.y+dSizeX/4.f, bigArrowSize, character.size, character, true, false);
 
     //drawScrollArrows(window, displayBounds.getCenter().x, 0.2f, displayBounds.getCenter().y, bigArrowSize, bigA);
     arrows[4 * player].pos.x = displayBounds.getCenter().x;

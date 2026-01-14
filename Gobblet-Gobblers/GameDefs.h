@@ -89,6 +89,7 @@ struct GameState {
     int old_col;
     bool waitingForLeftClick;
     bool correctSelection;
+
     bool heldDown;
 
     //score data

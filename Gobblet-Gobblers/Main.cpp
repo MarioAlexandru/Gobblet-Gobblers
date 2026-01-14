@@ -1,4 +1,5 @@
 ﻿#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "GameDefs.h"
 #include "GameLogic.h"
 #include "Input.h"
@@ -7,6 +8,18 @@
 
 using namespace sf;
 using namespace std;
+
+void drawText(RenderWindow& window, Text& object, string message, unsigned int fontSize, float xPerc, float yPerc, Color color) {
+    int winW = static_cast<float>(window.getSize().x);
+    int winH = static_cast<float>(window.getSize().y);
+
+    object.setCharacterSize(fontSize);
+    object.setString(message);
+    object.setPosition({ winW * xPerc, winH * yPerc });
+    object.setFillColor(color);
+
+    window.draw(object);
+}
 
 int main()
 {
@@ -22,6 +35,8 @@ int main()
     if (!font.openFromFile("Minecraftia-Regular.ttf")) return -1;
 
     Text text(font);
+    Text text2(font);
+    Text text3(font);
     text.setCharacterSize(24);
     text.setFillColor(Color::Red);
 
@@ -58,6 +73,19 @@ int main()
 
     Clock clock;
 
+    Texture bgTexture("bgSimple.png");
+    bgTexture.setRepeated(true);
+    Sprite bgSprite(bgTexture);
+    Texture titleTx("bgTitle.png");
+    Sprite bgTitle(titleTx);
+    Texture detTx1("detail1.png");
+    Sprite bgDet1(detTx1);
+
+    Music main("main.wav");
+    //main.setLoopPoints({ milliseconds(500), seconds(135) });
+
+    main.play();
+
     while (window.isOpen())
     {
         float dt = clock.restart().asSeconds();
@@ -76,7 +104,7 @@ int main()
         if (tx < 0) tx += tileSize; // ensure positive modulo
         int ty = offsetX;
 
-        drawBackground(window, tx, ty);
+        //drawBackground(window, tx, ty);
 
         myGame.stack->update(dt);
 
@@ -85,22 +113,26 @@ int main()
             case STATE_MENU:
             {
                 //window.draw(*piece);
+                drawMainBG(window, bgSprite, bgTitle, bgDet1);
                 window.draw(*myGame.stack);
                 drawMenu(window, myGame, font);
                 break;
             }
             case STATE_SELECT_MODE:
             {
+                drawScrollBG(window, tx, ty);
                 drawSelectGameModeMenu(window, myGame, font);
                 break;
             }
             case STATE_SELECT_DIFFICULTY:
             {
+                drawScrollBG(window, tx, ty);
                 drawSelectDifficultyMenu(window, myGame, font);
                 break;
             }
             case STATE_GAME:
             {
+                drawScrollBG(window, tx, ty);
                 drawGame(window, myGame, text, font);
                 if (myGame.matchState == STATE_PLAY) {
                     //nothing
@@ -115,11 +147,13 @@ int main()
             }
             case STATE_CUSTOMIZATION:
             {
+                drawScrollBG(window, tx, ty);
                 drawCustomizationMenu(window, myGame, arrows, text, font);
                 break;
             }
             case STATE_SAVE_HIGHSCORE: 
             {
+                drawScrollBG(window, tx, ty);
                 drawSaveToLeaderboard(window, myGame, text, font, temporary);
                 break;
             }

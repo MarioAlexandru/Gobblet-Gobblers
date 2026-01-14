@@ -150,7 +150,7 @@ bool movePiece(GameState& state, int old_l, int old_c, int new_l, int new_c) {
     if (punePiesa(state, new_l + 1, new_c + 1, pieceVal, true)) {
         T[old_l + 1][old_c + 1].p[varf] = 0;
         T[old_l + 1][old_c + 1].nr--;
-        //printf("Piesa mutata cu succes.\n");
+        //printf("Piesa mutata cu succes de pe pozitia %d %d pe %d %d.\n", old_l+1,old_c+1,new_l+1,new_c+1);
         return true;
     }
     return false;
