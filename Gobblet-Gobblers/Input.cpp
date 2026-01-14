@@ -352,6 +352,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                         old_line = line;
                         old_col = col;
                     }
+                    
                 }
 
             }
@@ -367,15 +368,12 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
 
         if (state.matchState == STATE_PLAY) {
             if (buttonReleased->button == Mouse::Button::Left && state.heldDown) {
-                if(!correctSelection) state.heldDown = false;
+                state.heldDown = false;
                 if (mouseF.x >= boardX && mouseF.x <= boardX + state.board.size && mouseF.y >= boardY && mouseF.y <= boardY + state.board.size) {
                     line = static_cast<int>((mPos.y - boardY) / latura);
                     col = static_cast<int>((mPos.x - boardX) / latura);
                     if (correctSelection) {
                         if (movePiece(state, old_line, old_col, line, col)) {
-                            old_line = -20; old_col = -20;
-                            correctSelection = false;
-                            state.heldDown = false;
                             //printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
                             checkWin(state, true);
                             player = 1 - player;
@@ -396,8 +394,6 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                     else {
                         int val = (player == P1) ? pieceSize : -1 * pieceSize;
                         if (punePiesa(state, line + 1, col + 1, val, false)) {
-                            old_line = -20; old_col = -20;
-                            correctSelection = false;
                             //printf("Current state has a value of: %d, for player %d\n", evaluate(state, player), player + 1);
                             checkWin(state, true);
                             player = 1 - player;
@@ -416,6 +412,8 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                         }
                     }
                 } 
+                old_line = -20; old_col = -20;
+                correctSelection = false;
             }
         }
         else if (state.matchState == STATE_PAUSED) { //pauseMenu

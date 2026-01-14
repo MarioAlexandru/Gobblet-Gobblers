@@ -167,6 +167,15 @@ FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scal
     return body.getGlobalBounds();
 }
 
+void drawUnknown(RenderWindow& window, float x, float y, float scale) {
+    Texture spritesheet("spritesheet.png");
+    Sprite unknown(spritesheet);
+    unknown.setTextureRect(IntRect({96,64}, {32,32}));
+    unknown.setPosition({ x,y });
+    unknown.setScale({ scale,scale });
+    window.draw(unknown);
+}
+
 void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
     auto board = state.board;
     auto& T = board.T;
@@ -174,9 +183,6 @@ void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
     auto boardY = board.pos.y;
 
     int varf = T[line + 1][col + 1].nr;
-    if (line == state.old_line && col == state.old_col) {
-        varf--;
-    }
     int valPiesa = T[line + 1][col + 1].p[varf];
     int pieceSize = abs(valPiesa);
 
@@ -190,6 +196,11 @@ void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
     float centerY = boardY + line * latura ;
     
     float scale = latura / 32.f;
+
+    if (line == state.old_line && col == state.old_col) {
+        drawUnknown(window, centerX, centerY, scale);
+        return;
+    }
 
     if (valPiesa < 0) {
         player = P2;
