@@ -6,7 +6,7 @@
 void simpleGradient(sf::RenderWindow& window, sf::Color color1, sf::Color color2, sf::IntRect rectangle);
 void displayFPS(RenderWindow& window, Font& font, float fpsCounter);
 
-void drawMainBG(RenderWindow& window, Sprite background, Sprite title, Sprite detail1);
+void drawMainBG(RenderWindow& window, Sprite background, Sprite title, Sprite detail1, Sprite detail2);
 void drawScrollBG(RenderWindow& window, int offsetx, int offsety);
 
 void drawGame(sf::RenderWindow& window, GameState& state, sf::Text& text, sf::Font& font);

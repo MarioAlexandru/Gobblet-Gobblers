@@ -78,16 +78,28 @@ int main()
     Sprite bgSprite(bgTexture);
     Texture titleTx("bgTitle.png");
     Sprite bgTitle(titleTx);
+    bgTitle.setOrigin({ 240,0 });
+    Angle titleRot = degrees(0);
+    float rotSpeed = 5.f;
+    int dir = 0;
     Texture detTx1("detail1.png");
     Sprite bgDet1(detTx1);
+    Texture detTx2("detail2.png");
+    Sprite bgDet2(detTx2);
+    float offsetY = 0;
+    float floatSpeed = 40.f;
+    int dir1 = 0;
 
     Music main("main.wav");
-    //main.setLoopPoints({ milliseconds(500), seconds(135) });
+    main.setLoopPoints({ milliseconds(500), seconds(135) });
 
     main.play();
 
     while (window.isOpen())
     {
+        float winW = static_cast<float>(window.getSize().x);
+        float winH = static_cast<float>(window.getSize().y);
+
         float dt = clock.restart().asSeconds();
         float fps = 1.0f / dt;
 
@@ -106,6 +118,39 @@ int main()
 
         //drawBackground(window, tx, ty);
 
+        if (dir == 0) {
+            titleRot += degrees(rotSpeed * dt);
+        }
+        else if (dir == 1) {
+            titleRot -= degrees(rotSpeed * dt);
+        }
+
+        if (titleRot >= degrees(10.f)) {
+            dir = 1;
+        }
+        else if (titleRot <= degrees(-15.f)) {
+            dir = 0;
+        }
+        
+        bgTitle.setRotation(titleRot);
+        
+
+        if (dir1 == 0) {
+            offsetY += floatSpeed * dt;
+        }
+        else if (dir1 == 1) {
+            offsetY -= floatSpeed * dt;
+        }
+
+        if (offsetY >= winH*0.1f) {
+            dir1 = 1;
+        }
+        else if (offsetY <= 0) {
+            dir1 = 0;
+        }
+
+        bgDet2.setPosition({ 0, -offsetY });
+
         myGame.stack->update(dt);
 
         switch (myGame.appState) 
@@ -113,8 +158,8 @@ int main()
             case STATE_MENU:
             {
                 //window.draw(*piece);
-                drawMainBG(window, bgSprite, bgTitle, bgDet1);
-                window.draw(*myGame.stack);
+                drawMainBG(window, bgSprite, bgTitle, bgDet1, bgDet2);
+                //window.draw(*myGame.stack);
                 drawMenu(window, myGame, font);
                 break;
             }

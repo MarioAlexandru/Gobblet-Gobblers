@@ -11,6 +11,8 @@ struct PieceStack;
 #define squareNumber 3
 #define P1 0
 #define P2 1
+#define PLACE 0
+#define MOVE 1
 
 //arrow sprites
 #define bigA 0
@@ -97,6 +99,8 @@ struct GameState {
     int scoreP1, scoreP2;
     time_t startTime;
     int totalElapsedSec;
+
+    interpolatingPiece interpolating;
 
     //player data
     String name[2];

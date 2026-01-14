@@ -212,25 +212,6 @@ void drawCell(RenderWindow& window, const GameState& state, int line, int col) {
     drawCharacter(window, centerX, centerY, scale, pieceSize, state.character[player], true, false);
 }
 
-void highlightSquare(RenderWindow& window, int col, int line) {
-    float winW = static_cast<float>(window.getSize().x);
-    float winH = static_cast<float>(window.getSize().y);
-    float currentTableSize = std::min(winW, winH) * 0.8f;
-
-    float boardX = (winW - currentTableSize) / 2.0f;
-    float boardY = (winH - currentTableSize) / 2.0f;
-    float latura = currentTableSize / squareNumber;
-
-    RectangleShape square({ latura, latura });
-    square.setFillColor(Color::Transparent);
-    square.setOutlineThickness(8.f);
-    square.setOutlineColor(Color::Red);
-
-    square.setPosition({ boardX + col * latura, boardY + line * latura });
-
-    window.draw(square);
-}
-
 void drawRemainingPieces(RenderWindow& window, const GameState& state, float scaleFactor, int player) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
@@ -306,19 +287,22 @@ void drawTable(RenderWindow& window, GameState& state) {
     drawRemainingPieces(window, state, latura / 32.f, P2);
 
     if (state.heldDown) {
-        drawCharacter(window, mouseF.x-latura/2.f, mouseF.y-latura/2.f, latura / 32.f, state.pieceSize, state.character[state.player], true, false);
+        drawCharacter(window, mouseF.x-latura/2.f, mouseF.y-latura/2.f, (latura / 32.f)*1.2f, state.pieceSize, state.character[state.player], true, false);
     }
 }
 
-void drawMainBG(RenderWindow& window, Sprite background, Sprite title, Sprite detail1) {
+void drawMainBG(RenderWindow& window, Sprite background, Sprite title, Sprite detail1, Sprite detail2) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
     background.setScale({ winH / 270.f, winH / 270.f });
     background.setTextureRect(IntRect({0,0}, { 2000, 270 }));
     title.setScale({ winW / 480.f, winH / 270.f });
+    title.setPosition({ winW / 2.f,0 });
     detail1.setScale({ winW / 480.f, winH / 270.f });
+    detail2.setScale({ winW / 480.f, winH / 270.f });
     window.draw(background);
     window.draw(detail1);
+    window.draw(detail2);
     window.draw(title);
 }
 
@@ -351,12 +335,6 @@ void drawGame(RenderWindow& window, GameState& state, Text& text, Font& font) {
     float winH = static_cast<float>(window.getSize().y);
 
     drawTable(window, state);
-
-    if (state.old_col != -20) {
-        highlightSquare(window, state.old_col, state.old_line);
-    }
-
-    
 
     //draw display text for current player's turn
     string temporary = "Player " + to_string(state.player + 1);
@@ -477,7 +455,9 @@ void drawWinMenu(RenderWindow& window, GameState state, Text& text, Font& font) 
     ButtonConfig saveScoreCfg = { "SAVE TO LEADERBOARD", 0.5f, 0.80f, Color::White, 0.035f };
     ButtonConfig returnMainCfg = { "RETURN TO MAIN MENU", 0.5f, 0.90f, Color::White, 0.035f };
     drawStyledButton(window, font, winMessageCfg);
-    drawStyledButton(window, font, saveScoreCfg);
+    if (state.gameMode == PVP || state.winner == P1) {
+        drawStyledButton(window, font, saveScoreCfg);
+    }
     drawStyledButton(window, font, returnMainCfg);
 }
 

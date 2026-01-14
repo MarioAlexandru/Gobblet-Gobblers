@@ -298,6 +298,8 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
     auto boardY = state.board.pos.y;
     float latura = boardSize / squareNumber;
 
+    FloatRect pieces[3];
+
     if (const auto* key = event.getIf<Event::KeyReleased>()) {
         if (state.matchState != STATE_WIN && key->scancode == Keyboard::Scancode::Escape) {
             togglePause(state);
@@ -314,7 +316,6 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
         if (buttonHeldDown->button == Mouse::Button::Left && !state.heldDown) {
             Vector2i mPos = Mouse::getPosition(window);
             Vector2f mouseF(static_cast<float>(mPos.x), static_cast<float>(mPos.y));
-            FloatRect pieces[3];
             float posX;
             float startY = state.board.pos.y;
 
@@ -442,7 +443,7 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                 if (btnMainMenuRect.contains(mouseF)) {
                     state.appState = STATE_MENU;
                 }
-                else if (btnSaveScoreRect.contains(mouseF)) {
+                else if (btnSaveScoreRect.contains(mouseF) && state.gameMode == PVP || btnSaveScoreRect.contains(mouseF) && state.winner == P1) {
                     state.appState = STATE_SAVE_HIGHSCORE;
                 }
             }
