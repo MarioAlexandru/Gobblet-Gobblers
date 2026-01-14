@@ -1,5 +1,6 @@
 ﻿#include "Input.h"
 #include "GameLogic.h"
+#include "PieceStack.h"
 #include "Renderer.h"
 #include <iostream>
 #include <string>
@@ -427,12 +428,14 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
     }
 }
 
-void handleResize(RenderWindow& window, const Event::Resized& resizeEvent) {
+void handleResize(RenderWindow& window, const Event::Resized& resizeEvent,GameState& state) {
     FloatRect visibleArea(
         { 0.f, 0.f },
         { static_cast<float>(resizeEvent.size.x), static_cast<float>(resizeEvent.size.y) }
     );
     window.setView(View(visibleArea));
+
+    state.stack->handleResize();
 }
 
 void handleInput(RenderWindow& window, GameState& state, arrowSet arrows[], String& inputBuffer) {
@@ -443,7 +446,7 @@ void handleInput(RenderWindow& window, GameState& state, arrowSet arrows[], Stri
         }
         else if(const auto* resizeEvent = event->getIf<Event::Resized>())
         {
-            handleResize(window, *resizeEvent);
+            handleResize(window, *resizeEvent, state);
         }
 
         switch (state.appState) {

@@ -4,6 +4,8 @@
 
 using namespace sf;
 
+struct PieceStack;
+
 // Constants
 #define pieceTypes 3
 #define squareNumber 3
@@ -103,6 +105,8 @@ struct GameState {
     AppState appState;
     GameMode gameMode;
     MatchState matchState;
+
+    std::shared_ptr<PieceStack> stack;
 };
 
 struct ButtonConfig {

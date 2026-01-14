@@ -1,8 +1,9 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include "GameDefs.h"
 #include "GameLogic.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "PieceStack.h"
 
 using namespace sf;
 using namespace std;
@@ -29,7 +30,31 @@ int main()
     float offsetX = 0;
     const int tileSize = 164;
 
+    Texture texture;
+
+    if (!texture.loadFromFile("medium-idle.png"))
+    {
+        return -1;
+    }
+
     String temporary;
+    
+    Character player1Test;
+
+    player1Test.bodyType = 0; 
+    player1Test.accessory = 0;
+    player1Test.size = 2;     
+
+    player1Test.palette[0] = sf::Color::Red;
+
+    player1Test.palette[1] = sf::Color::Blue;
+    player1Test.palette[2] = sf::Color::Green;
+
+    player1Test.bodyColor = 2;
+
+    myGame.stack = std::make_shared<PieceStack>(font, texture, sf::Vector2f(700.f, 300.f), 1, 32, player1Test);
+    myGame.stack->bindToWindow(window);
+    myGame.stack->setRelativePosition({ 50.f,30.f });
 
     Clock clock;
 
@@ -52,12 +77,15 @@ int main()
         int ty = offsetX;
 
         drawBackground(window, tx, ty);
-        
+
+        myGame.stack->update(dt);
 
         switch (myGame.appState) 
         {
             case STATE_MENU:
             {
+                //window.draw(*piece);
+                window.draw(*myGame.stack);
                 drawMenu(window, myGame, font);
                 break;
             }
