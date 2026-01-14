@@ -76,14 +76,20 @@ int main()
     Texture bgTexture("bgSimple.png");
     bgTexture.setRepeated(true);
     Sprite bgSprite(bgTexture);
+
     Texture titleTx("bgTitle.png");
     Sprite bgTitle(titleTx);
     bgTitle.setOrigin({ 240,0 });
     Angle titleRot = degrees(0);
     float rotSpeed = 5.f;
     int dir = 0;
+
     Texture detTx1("detail1.png");
     Sprite bgDet1(detTx1);
+    float transparency = 255;
+    float speed = 70.f;
+    int dir2 = 0;
+
     Texture detTx2("detail2.png");
     Sprite bgDet2(detTx2);
     float offsetY = 0;
@@ -150,6 +156,22 @@ int main()
         }
 
         bgDet2.setPosition({ 0, -offsetY });
+
+        if (dir2 == 0) {
+            transparency += speed * dt;
+        }
+        else if (dir2 == 1) {
+            transparency -= speed * dt;
+        }
+
+        if (transparency <= 0.f) {
+            dir2 = 0;
+        }
+        else if (transparency >= 255.f) {
+            dir2 = 1;
+        }
+
+        bgDet1.setColor(Color(255, 255, 255, static_cast<int>(transparency)));
 
         myGame.stack->update(dt);
 

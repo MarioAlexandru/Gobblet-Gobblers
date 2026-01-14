@@ -56,6 +56,7 @@ void initGame(GameState& state) {
 void defaultCustomization(Character characters[]) {
     for (int p = P1; p <= P2; p++) {
         characters[p].bodyColor = 0;
+        characters[p].accessory = 0;
         characters[p].size = 1;
 
         characters[p].palette[0] = Color(177,62,63-40);

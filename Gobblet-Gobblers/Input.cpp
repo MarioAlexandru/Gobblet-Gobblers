@@ -177,11 +177,17 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
             FloatRect smallArrow0 = getArrowRect(window, arrows[4 * P1+2], leftA);
             FloatRect smallArrow1 = getArrowRect(window, arrows[4 * P1+2], rightA);
 
+            FloatRect accessoryArrow0 = getArrowRect(window, arrows[4 * P1 + 3], leftA);
+            FloatRect accessoryArrow1 = getArrowRect(window, arrows[4 * P1 + 3], rightA);
+
             FloatRect bigArrow2 = getArrowRect(window, arrows[4 * P2], leftA);
             FloatRect bigArrow3 = getArrowRect(window, arrows[4 * P2], rightA);
 
             FloatRect smallArrow2 = getArrowRect(window, arrows[4 * P2 + 2], leftA);
             FloatRect smallArrow3 = getArrowRect(window, arrows[4 * P2 + 2], rightA);
+
+            FloatRect accessoryArrow2 = getArrowRect(window, arrows[4 * P2 + 3], leftA);
+            FloatRect accessoryArrow3 = getArrowRect(window, arrows[4 * P2 + 3], rightA);
             
             if (doneButton.contains(mouseF)) {
                 //state.name[P1].insert(0, inputBuffer);
@@ -205,6 +211,14 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
                 state.character[P1].bodyColor += 1;
                 if (state.character[P1].bodyColor > 7) state.character[P1].bodyColor = 0;
             }
+            else if (accessoryArrow0.contains(mouseF)) {
+                state.character[P1].accessory -= 1;
+                if (state.character[P1].accessory < 0) state.character[P1].accessory = 5;
+            }
+            else if (accessoryArrow1.contains(mouseF)) {
+                state.character[P1].accessory += 1;
+                if (state.character[P1].accessory > 5) state.character[P1].accessory = 0;
+            }
             else if (state.gameMode == PVP) {
                 if (bigArrow2.contains(mouseF)) {
                     state.character[P2].size -= 1;
@@ -221,6 +235,14 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
                 else if (smallArrow3.contains(mouseF)) {
                     state.character[P2].bodyColor += 1;
                     if (state.character[P2].bodyColor > 7) state.character[P2].bodyColor = 0;
+                }
+                else if (accessoryArrow2.contains(mouseF)) {
+                    state.character[P2].accessory -= 1;
+                    if (state.character[P2].accessory < 0) state.character[P2].accessory = 5;
+                }
+                else if (accessoryArrow3.contains(mouseF)) {
+                    state.character[P2].accessory += 1;
+                    if (state.character[P2].accessory > 5) state.character[P2].accessory = 0;
                 }
             }
         }

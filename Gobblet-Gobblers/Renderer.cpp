@@ -127,26 +127,35 @@ void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg)
 
 FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scaleFactor, int pieceSize, Character character, bool draw, bool unavailable) {
     Texture spritesheet("spritesheet.png");
+    Texture accessorySheet("accessorySheet.png");
     Sprite body(spritesheet);
     Sprite face(spritesheet);
+    Sprite accessory(accessorySheet);
 
     body.setPosition({ posX, posY });
     face.setPosition({ posX, posY });
+    accessory.setPosition({ posX, posY });
     body.scale({ scaleFactor,scaleFactor });
     face.scale({ scaleFactor,scaleFactor });
+    accessory.scale({ scaleFactor,scaleFactor });
+
+    int accessoryY = character.accessory * 32;
 
     switch (pieceSize) {
     case 1:
         body.setTextureRect(IntRect({ 0,32 }, { 32,32 }));
         face.setTextureRect(IntRect({ 0,64 }, { 32,32 }));
+        accessory.setTextureRect(IntRect({ 0,accessoryY }, { 32,32 }));
         break;
     case 2:
         body.setTextureRect(IntRect({ 32,32 }, { 32,32 }));
         face.setTextureRect(IntRect({ 32,64 }, { 32,32 }));
+        accessory.setTextureRect(IntRect({ 32,accessoryY }, { 32,32 }));
         break;
     case 3:
         body.setTextureRect(IntRect({ 64,32 }, { 32,32 }));
         face.setTextureRect(IntRect({ 64,64 }, { 32,32 }));
+        accessory.setTextureRect(IntRect({ 64,accessoryY }, { 32,32 }));
         break;
     }
 
@@ -158,11 +167,13 @@ FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scal
         uint32_t B = character.palette[character.bodyColor].r;
         body.setColor(Color(R, G, B, 100));
         face.setColor(Color(R, G, B, 100));
+        accessory.setColor(Color(R, G, B, 100));
     }
 
     if (draw) {
         window.draw(body);
         window.draw(face);
+        window.draw(accessory);
     }
     return body.getGlobalBounds();
 }
