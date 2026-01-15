@@ -4,6 +4,8 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <chrono>
+#include <format>
 
 using namespace std;
 
@@ -55,6 +57,7 @@ void initGame(GameState& state) {
 
 void defaultCustomization(Character characters[]) {
     for (int p = P1; p <= P2; p++) {
+        characters[p].bodyType = 0;
         characters[p].bodyColor = 0;
         characters[p].accessory = 0;
         characters[p].size = 1;
@@ -440,7 +443,14 @@ bool saveGameState(GameState& state, const char* filename) {
     }
 
     //time elapsed
-    saveFile << state.totalElapsedSec;
+    saveFile << state.totalElapsedSec << '\n';
+
+    //Character customizations
+    for (int p = P1; p <= P2; p++) {
+        saveFile << state.character[p].bodyType << '\n';
+        saveFile << state.character[p].bodyColor << '\n';
+        saveFile << state.character[p].accessory << '\n';
+    }
 
     return true;
 }
@@ -481,5 +491,35 @@ bool loadGameState(GameState& state, const char* filename) {
 
     if (!(file >> state.totalElapsedSec)) return false;
 
+    for (int p = P1; p <= P2; p++) {
+        if (!(file >> state.character[p].bodyType)) return false;
+        if (!(file >> state.character[p].bodyColor)) return false;
+        if (!(file >> state.character[p].accessory)) return false;
+    }
+
     return true;
+}
+
+int getCurrentDateAsInt() {
+    using namespace std::chrono;
+    // Get current time point
+    auto now = system_clock::now();
+
+    // Get local time zone
+    auto local_tz = current_zone();
+
+    // Convert to local time
+    auto local_time = local_tz->to_local(now);
+
+    // Truncate to days
+    auto local_days = floor<days>(local_time);
+
+    // Convert to year_month_day
+    year_month_day ymd{ local_days };
+
+    int day = static_cast<unsigned>(ymd.day());
+    int month = static_cast<unsigned>(ymd.month());
+    int year = static_cast<int>(ymd.year());
+
+    return day * 1000000 + month * 10000 + year;
 }

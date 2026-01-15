@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#include <string>
 
 using namespace sf;
 
@@ -13,6 +14,9 @@ struct PieceStack;
 #define P2 1
 #define PLACE 0
 #define MOVE 1
+
+#define MAX_NAME_LEN 18
+#define MAX_ENTRIES 20
 
 //arrow sprites
 #define bigA 0
@@ -35,6 +39,7 @@ enum AppState {
     STATE_CUSTOMIZATION,
     STATE_SAVE_HIGHSCORE,
     STATE_GAME,
+    STATE_LEADERBOARD,
     STATE_SETTINGS
 };
 
@@ -78,6 +83,14 @@ struct TextBox {
     bool isEmpty;
 };
 
+struct LeaderEntry {
+    std::string name;
+    int score;
+    int mode;          // 0, 1, 2
+    int date;          // YYYYMMDD (e.g., 20251228)
+    // Add later: time_sec, pieces_used, etc.
+};
+
 struct GameState {
     // Board Data
     boardObj board;
@@ -101,7 +114,7 @@ struct GameState {
     int totalElapsedSec;
 
     //player data
-    String name[2];
+    //String name[2];
     Character character[2];
     TextBox tb;
 

@@ -140,20 +140,21 @@ FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scal
     accessory.scale({ scaleFactor,scaleFactor });
 
     int accessoryY = character.accessory * 32;
+    int bodyY = (1 - character.bodyType) * 32;
 
     switch (pieceSize) {
     case 1:
-        body.setTextureRect(IntRect({ 0,32 }, { 32,32 }));
+        body.setTextureRect(IntRect({ 0,bodyY }, { 32,32 }));
         face.setTextureRect(IntRect({ 0,64 }, { 32,32 }));
         accessory.setTextureRect(IntRect({ 0,accessoryY }, { 32,32 }));
         break;
     case 2:
-        body.setTextureRect(IntRect({ 32,32 }, { 32,32 }));
+        body.setTextureRect(IntRect({ 32,bodyY }, { 32,32 }));
         face.setTextureRect(IntRect({ 32,64 }, { 32,32 }));
         accessory.setTextureRect(IntRect({ 32,accessoryY }, { 32,32 }));
         break;
     case 3:
-        body.setTextureRect(IntRect({ 64,32 }, { 32,32 }));
+        body.setTextureRect(IntRect({ 64,bodyY }, { 32,32 }));
         face.setTextureRect(IntRect({ 64,64 }, { 32,32 }));
         accessory.setTextureRect(IntRect({ 64,accessoryY }, { 32,32 }));
         break;
@@ -367,7 +368,7 @@ void drawGame(RenderWindow& window, GameState& state, Text& text, Font& font) {
     drawStyledButton(window, font, timeDisplayCfg);
 }
 
-void drawTextInput(RenderWindow& window, TextBox object, Text& text, String& textString) {
+void drawTextInput(RenderWindow& window, TextBox object, Text& text, string& textString) {
     float winW = static_cast<float>(window.getSize().x);
     float winH = static_cast<float>(window.getSize().y);
 
@@ -467,7 +468,7 @@ void drawWinMenu(RenderWindow& window, GameState state, Text& text, Font& font) 
     ButtonConfig returnMainCfg = { "RETURN TO MAIN MENU", 0.5f, 0.90f, Color::White, 0.035f };
     drawStyledButton(window, font, winMessageCfg);
     if (state.gameMode == PVP || state.winner == P1) {
-        drawStyledButton(window, font, saveScoreCfg);
+        //drawStyledButton(window, font, saveScoreCfg);
     }
     drawStyledButton(window, font, returnMainCfg);
 }
@@ -486,11 +487,13 @@ void drawMenu(RenderWindow& window,GameState state, Font& font) {
     //ButtonConfig titleCfg = { "GOBBLET GOBBLERS",  0.5f, 0.20f, Color::Yellow, 0.08f };
     ButtonConfig playCfg = { "NEW GAME",           0.5f, 0.45f, Color::White,  0.05f };
     ButtonConfig loadCfg = { "LOAD GAME",          0.5f, 0.60f, loadColor, 0.05f };
-    ButtonConfig exitCfg = { "EXIT",               0.5f, 0.75f, Color::White,  0.05f };
+    ButtonConfig leadCfg = { "LEADERBOARD",        0.5f, 0.75f, Color::White,  0.05f };
+    ButtonConfig exitCfg = { "EXIT",               0.5f, 0.90f, Color::White,  0.05f };
 
     //drawStyledButton(window, font, titleCfg);
     drawStyledButton(window, font, playCfg);
     drawStyledButton(window, font, loadCfg);
+    //drawStyledButton(window, font, leadCfg);
     drawStyledButton(window, font, exitCfg);
 }
 
@@ -541,7 +544,7 @@ void drawTextBox(RenderWindow& window, TextBox object) {
 
 }
 
-void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, Font font, String& textString) {
+void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, Font font, string& textString) {
     ButtonConfig saveScoreCfg = { "SAVE HIGHSCORE", 0.5f, 0.95f, Color::Red, 0.04f };
     drawStyledButton(window, font, saveScoreCfg);
 
@@ -549,7 +552,7 @@ void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, F
     state.tb.size = { 0.45f,0.1f };
     drawTextBox(window, state.tb);
 
-    if (textString.getSize() >= 1) {
+    if (textString.length() >= 1) {
         drawTextInput(window, state.tb, text, textString);
     }
 }
@@ -639,7 +642,9 @@ void drawPlrCustomize(RenderWindow& window, Character character, arrowSet arrows
 
     arrows[4 * player + 2].pos.y = 0.785f * winH;
     drawScrollArrows(window, arrows[4 * player + 2]);
-    ButtonConfig accesoryCfg = { "accesory1",  xPerc, 0.845f, Color::White, 0.025f };
+    string accs = "Accessory ";
+    accs += to_string(character.accessory);
+    ButtonConfig accesoryCfg = { accs.c_str(),  xPerc, 0.845f, Color::White, 0.025f};
 
     arrows[4 * player + 3].pos.y = 0.845f * winH;
     drawScrollArrows(window, arrows[4 * player + 3]);
@@ -665,5 +670,9 @@ void drawCustomizationMenu(RenderWindow& window, GameState& state, arrowSet arro
 
     ButtonConfig doneCfg = { "DONE CUSTOMIZING",  0.5f, 0.95f, Color::Red, 0.04f };
     drawStyledButton(window, font, doneCfg);
+
+}
+
+void drawLeaderboard(RenderWindow& window, GameState& state) {
 
 }

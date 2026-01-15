@@ -17,9 +17,11 @@ void drawMenu(RenderWindow& window, GameState state, Font& font);
 void drawSelectGameModeMenu(sf::RenderWindow& window, GameState state, sf::Font& font);
 void drawSelectDifficultyMenu(RenderWindow& window, GameState state, Font& font);
 void drawCustomizationMenu(RenderWindow& window, GameState& state, arrowSet arrows[], Text& text, Font& font);
-void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, Font font, String& textString);
+void drawSaveToLeaderboard(RenderWindow& window, GameState& state, Text& text, Font font, std::string& textString);
 
 FloatRect drawCharacter(RenderWindow& window, float posX, float posY, float scaleFactor, int pieceSize, Character character, bool draw, bool unavailable);
 void drawStyledButton(RenderWindow& window, Font& font, const ButtonConfig& cfg);
+
+void drawLeaderboard(RenderWindow& window, GameState& state);
 
 

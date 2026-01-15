@@ -86,7 +86,8 @@ void handleMenuInput(RenderWindow& window, GameState& state,  const Event& event
 
             FloatRect btnPlayRect = getButtonRect(window, 0.5f, 0.45f, 0.05f, 0.4f);
             FloatRect btnLoadRect = getButtonRect(window, 0.5f, 0.60f, 0.05f, 0.4f);
-            FloatRect btnExitRect = getButtonRect(window, 0.5f, 0.75f, 0.05f, 0.2f);
+            FloatRect btnLeadRect = getButtonRect(window, 0.5f, 0.75f, 0.05f, 0.45f);
+            FloatRect btnExitRect = getButtonRect(window, 0.5f, 0.90f, 0.05f, 0.175f);
 
             if (btnPlayRect.contains(mouseF)) {
                 state.appState = STATE_SELECT_MODE;
@@ -94,6 +95,7 @@ void handleMenuInput(RenderWindow& window, GameState& state,  const Event& event
             else if (btnLoadRect.contains(mouseF))
             {
                 initGame(state);
+                defaultCustomization(state.character);
                 if (!(loadGameState(state, "save.txt"))) {
                     printf("Failed to load game correctly");
                 }
@@ -102,7 +104,11 @@ void handleMenuInput(RenderWindow& window, GameState& state,  const Event& event
                     printf("Last game has been succesfully loaded");
                 }
             }
+            /*else if (btnLeadRect.contains(mouseF)) {
+                state.appState = STATE_LEADERBOARD;
+            }*/
             else if (btnExitRect.contains(mouseF)) {
+                //saveLeaderboard(state.leaderboard, "scores.txt");
                 window.close();
             }
         }
@@ -180,6 +186,9 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
             FloatRect accessoryArrow0 = getArrowRect(window, arrows[4 * P1 + 3], leftA);
             FloatRect accessoryArrow1 = getArrowRect(window, arrows[4 * P1 + 3], rightA);
 
+            FloatRect bodyArrow0 = getArrowRect(window, arrows[4 * P1 + 1], leftA);
+            FloatRect bodyArrow1 = getArrowRect(window, arrows[4 * P1 + 1], rightA);
+
             FloatRect bigArrow2 = getArrowRect(window, arrows[4 * P2], leftA);
             FloatRect bigArrow3 = getArrowRect(window, arrows[4 * P2], rightA);
 
@@ -188,6 +197,9 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
 
             FloatRect accessoryArrow2 = getArrowRect(window, arrows[4 * P2 + 3], leftA);
             FloatRect accessoryArrow3 = getArrowRect(window, arrows[4 * P2 + 3], rightA);
+
+            FloatRect bodyArrow2 = getArrowRect(window, arrows[4 * P2 + 1], leftA);
+            FloatRect bodyArrow3 = getArrowRect(window, arrows[4 * P2 + 1], rightA);
             
             if (doneButton.contains(mouseF)) {
                 //state.name[P1].insert(0, inputBuffer);
@@ -219,6 +231,14 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
                 state.character[P1].accessory += 1;
                 if (state.character[P1].accessory > 5) state.character[P1].accessory = 0;
             }
+            else if (bodyArrow0.contains(mouseF)) {
+                state.character[P1].bodyType -= 1;
+                if (state.character[P1].bodyType < 0) state.character[P1].bodyType = 1;
+            }
+            else if (bodyArrow1.contains(mouseF)) {
+                state.character[P1].bodyType += 1;
+                if (state.character[P1].bodyType > 1) state.character[P1].bodyType = 0;
+            }
             else if (state.gameMode == PVP) {
                 if (bigArrow2.contains(mouseF)) {
                     state.character[P2].size -= 1;
@@ -244,12 +264,20 @@ void handleCustomizationMenuInput(RenderWindow& window, GameState& state, arrowS
                     state.character[P2].accessory += 1;
                     if (state.character[P2].accessory > 5) state.character[P2].accessory = 0;
                 }
+                else if (bodyArrow2.contains(mouseF)) {
+                    state.character[P2].bodyType -= 1;
+                    if (state.character[P2].bodyType < 0) state.character[P2].bodyType = 1;
+                }
+                else if (bodyArrow3.contains(mouseF)) {
+                    state.character[P2].bodyType += 1;
+                    if (state.character[P2].bodyType > 1) state.character[P2].bodyType = 0;
+                }
             }
         }
     }
 }
 
-void handleSaveScoreInput(RenderWindow& window, GameState& state, const Event& event, String& inputBuffer) {
+void handleSaveScoreInput(RenderWindow& window, GameState& state, const Event& event, string& inputBuffer) {
     if (state.tb.isEmpty && !state.tb.Focused) {
         inputBuffer = "your name...";
     }
@@ -271,14 +299,16 @@ void handleSaveScoreInput(RenderWindow& window, GameState& state, const Event& e
             }
             else if (!textBoxP1.contains(mouseF) && state.tb.Focused){
                 state.tb.Focused = false;
-                if (inputBuffer.isEmpty()) {
+                if (inputBuffer.empty()) {
                     state.tb.isEmpty = true;
                 }
             }
-            else if (saveScoreButton.contains(mouseF)) {
+            else if (saveScoreButton.contains(mouseF) && !state.tb.isEmpty) {
                 //state.name[P1].insert(0, inputBuffer);
                 //cout << "String '" << state.name[P1].toAnsiString() << "' succesfully copied to gameState name of player "<<P1+1<<  endl;
                 //initGame(state);
+                //insertLeaderEntry(state.leaderboard, inputBuffer, state.scoreP1, state.gameMode);
+                printf("Saved string: %s to leaderboard\n", inputBuffer);
                 state.appState = STATE_MENU;
             }
         }
@@ -286,17 +316,17 @@ void handleSaveScoreInput(RenderWindow& window, GameState& state, const Event& e
     else if (const auto* textEntered = event.getIf<Event::TextEntered>())
     {
         if (state.tb.Focused) {
-            if (textEntered->unicode > 32 && textEntered->unicode < 127 && inputBuffer.getSize()<18) {
+            if (textEntered->unicode > 32 && textEntered->unicode < 127 && inputBuffer.length() < 18) {
                 inputBuffer += static_cast<char>(textEntered->unicode);
             }
-            else if (textEntered->unicode == 8 && inputBuffer.getSize() >= 1)
-                inputBuffer.erase(inputBuffer.getSize() - 1, 1);
+            else if (textEntered->unicode == 8 && inputBuffer.length() >= 1)
+                inputBuffer.pop_back();
         }
     }
     else if (const auto* key = event.getIf<Event::KeyReleased>()) {
         if (key->scancode == Keyboard::Scancode::Enter) {
             state.tb.Focused = false;
-            if (inputBuffer.isEmpty()) {
+            if (inputBuffer.empty()) {
                 state.tb.isEmpty = true;
             }
         }
@@ -465,9 +495,9 @@ void handleGameInput(RenderWindow& window, GameState& state, const Event& event)
                 if (btnMainMenuRect.contains(mouseF)) {
                     state.appState = STATE_MENU;
                 }
-                else if (btnSaveScoreRect.contains(mouseF) && state.gameMode == PVP || btnSaveScoreRect.contains(mouseF) && state.winner == P1) {
+                /*else if (btnSaveScoreRect.contains(mouseF) && state.gameMode == PVP || btnSaveScoreRect.contains(mouseF) && state.winner == P1) {
                     state.appState = STATE_SAVE_HIGHSCORE;
-                }
+                }*/
             }
         }
     }
@@ -483,7 +513,7 @@ void handleResize(RenderWindow& window, const Event::Resized& resizeEvent,GameSt
     state.stack->handleResize();
 }
 
-void handleInput(RenderWindow& window, GameState& state, arrowSet arrows[], String& inputBuffer) {
+void handleInput(RenderWindow& window, GameState& state, arrowSet arrows[], string& inputBuffer) {
     while (const optional event = window.pollEvent()) {
         if (event->is<Event::Closed>())
         {

@@ -52,7 +52,7 @@ int main()
         return -1;
     }
 
-    String temporary;
+    string temporary;
     
     Character player1Test;
 
@@ -218,10 +218,16 @@ int main()
                 drawCustomizationMenu(window, myGame, arrows, text, font);
                 break;
             }
+            /*case STATE_LEADERBOARD:
+            {
+                drawScrollBG(window, tx, ty);
+                drawCustomizationMenu(window, myGame, arrows, text, font);
+                break;
+            }*/
             case STATE_SAVE_HIGHSCORE: 
             {
                 drawScrollBG(window, tx, ty);
-                drawSaveToLeaderboard(window, myGame, text, font, temporary);
+                //drawSaveToLeaderboard(window, myGame, text, font, temporary);
                 break;
             }
         }
