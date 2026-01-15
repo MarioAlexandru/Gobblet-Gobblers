@@ -4,8 +4,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
-#include <chrono>
-#include <format>
+
 
 using namespace std;
 
@@ -498,28 +497,4 @@ bool loadGameState(GameState& state, const char* filename) {
     }
 
     return true;
-}
-
-int getCurrentDateAsInt() {
-    using namespace std::chrono;
-    // Get current time point
-    auto now = system_clock::now();
-
-    // Get local time zone
-    auto local_tz = current_zone();
-
-    // Convert to local time
-    auto local_time = local_tz->to_local(now);
-
-    // Truncate to days
-    auto local_days = floor<days>(local_time);
-
-    // Convert to year_month_day
-    year_month_day ymd{ local_days };
-
-    int day = static_cast<unsigned>(ymd.day());
-    int month = static_cast<unsigned>(ymd.month());
-    int year = static_cast<int>(ymd.year());
-
-    return day * 1000000 + month * 10000 + year;
 }
